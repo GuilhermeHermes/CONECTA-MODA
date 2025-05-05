@@ -69,10 +69,10 @@ export function RoleSelection({ onSelect }: RoleSelectionProps) {
       </Radio.Group>
 
       <Group justify="space-between" mt="xl">
-        <Button variant="outline" onClick={() => window.history.back()}>
+        <Button variant="outline" onClick={() => window.history.back()} color="#0E4B82">
           Voltar
         </Button>
-        <Button onClick={handleSubmit} disabled={!selectedRole}>
+        <Button onClick={handleSubmit} disabled={!selectedRole} color="#0E4B82">
           Próximo
         </Button>
       </Group>

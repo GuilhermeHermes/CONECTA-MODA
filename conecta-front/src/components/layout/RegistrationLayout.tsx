@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Paper, Container, Title, Text, Stepper, Group } from '@mantine/core';
+import { Paper, Container, Title, Text, Stepper } from '@mantine/core';
 
 interface RegistrationLayoutProps {
   children: ReactNode;
@@ -9,16 +9,15 @@ interface RegistrationLayoutProps {
 }
 
 const steps = [
-  { label: 'Selecione seu perfil', description: 'Escolha o tipo de perfil' },
+  { label: 'Selecione seu perfil', description: 'tipo de perfil no Conecta' },
   { label: 'Sobre você', description: 'Informações pessoais' },
-  { label: 'Cadastre seu perfil', description: 'Finalize seu cadastro' },
+  { label: 'Cadastre seu perfil', description: 'Finalize seu cadastro com as informações específicas' },
 ];
-
 export function RegistrationLayout({ children, currentStep, title, description }: RegistrationLayoutProps) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', minHeight: '100vh' }}>
       {/* Sidebar */}
-      <Paper bg="blue.8" p="xl" style={{ color: 'white' }}>
+      <Paper bg="#0E4B82" p="xl" style={{ color: 'white', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <Stepper
           active={currentStep}
           orientation="vertical"
@@ -27,6 +26,7 @@ export function RegistrationLayout({ children, currentStep, title, description }
             stepBody: { color: 'white' },
             stepDescription: { color: 'white' },
             stepLabel: { color: 'white' },
+            stepCompletedIcon: { color: '#008adb' }, // Use a hex color code here
           }}
         >
           {steps.map((step, index) => (
@@ -34,6 +34,7 @@ export function RegistrationLayout({ children, currentStep, title, description }
               key={index}
               label={step.label}
               description={step.description}
+              completed={index < currentStep}
             />
           ))}
         </Stepper>
@@ -42,7 +43,7 @@ export function RegistrationLayout({ children, currentStep, title, description }
       {/* Content */}
       <Container size="lg" py="xl">
         <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <Title order={2} c="blue.8" mb="xs">
+          <Title order={2} c="#0E4B82" mb="xs">
             {title}
           </Title>
           <Text c="dimmed" mb="xl">
@@ -53,4 +54,4 @@ export function RegistrationLayout({ children, currentStep, title, description }
       </Container>
     </div>
   );
-} 
+}

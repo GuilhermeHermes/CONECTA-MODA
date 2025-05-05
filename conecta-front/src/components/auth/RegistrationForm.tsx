@@ -255,10 +255,10 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
         </Group>
 
         <Group justify="space-between" mt="xl">
-          <Button variant="outline" onClick={() => window.history.back()}>
+          <Button variant="outline" onClick={() => window.history.back()} color="#0E4B82"> 
             Voltar
           </Button>
-          <Button type="submit">
+          <Button type="submit" color="#0E4B82">
             Próximo
           </Button>
         </Group>
