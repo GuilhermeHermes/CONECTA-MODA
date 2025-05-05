@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { TextInput, PasswordInput, Button, Text, Anchor, Paper, Title, Container } from '@mantine/core';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -38,96 +39,79 @@ export default function LoginPage() {
 
   return (
     <div className="grid grid-cols-2 gap-4">
-        <div>
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <Image
-                    src="/assets/conecta-img.svg"
-                    alt="Background image"
-                    width={800}
-                    height={1024}
-                    className="mx-auto"
-                />
-            </div>
-        </div>
+      <div>
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
+          <Image
+            src="/assets/conecta-img.svg"
+            alt="Background image"
+            width={800}
+            height={1024}
+            className="mx-auto"
+          />
+        </div>
+      </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Container size="xs" w="100%">
+          <Paper radius="md" p="xl" withBorder>
             <div className="text-center">
-            <Image
+              <Image
                 src="/assets/logo.svg"
                 alt="Logo"
                 width={150}
                 height={150}
                 className="mx-auto"
-                />
-            <h2 className="mt-6 text-3xl font-bold text-gray-900">
+              />
+              <Title order={2} mt="md" mb="xs">
                 Bem-vindo de volta
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
+              </Title>
+              <Text c="dimmed" size="sm">
                 Entre com suas credenciais para acessar sua conta
-            </p>
+              </Text>
             </div>
 
-            <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            {error && (
-                <div className="text-red-500 text-sm text-center">{error}</div>
-                )}
-            
-            <div className="rounded-md shadow-sm -space-y-px">
-                <div>
-                <label htmlFor="email" className="sr-only">
-                    Email
-                </label>
-                <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    />
-                </div>
-                <div>
-                <label htmlFor="password" className="sr-only">
-                    Senha
-                </label>
-                <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                    placeholder="Senha"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
-            </div>
-            <div>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
+            <form onSubmit={handleSubmit}>
+              {error && (
+                <Text c="red" size="sm" ta="center" mb="md">
+                  {error}
+                </Text>
+              )}
+
+              <TextInput
+                label="Email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                mt="md"
+              />
+
+              <PasswordInput
+                label="Senha"
+                placeholder="Sua senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                mt="md"
+              />
+
+              <Anchor component="button" type="button" c="dimmed" size="sm" mt="xs">
                 Esqueceu sua senha?
-                </a>
-            </div>
-            
-            <div>
-                <a href="#" className="text-sm text-gray-600 hover:text-gray-900">
-                Cadastre-se aqui
-                </a>
-            </div>
-            
+              </Anchor>
 
-            <div>
-                <button
-                type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
+              <Button fullWidth mt="xl" type="submit">
                 Entrar
-                </button>
-            </div>
+              </Button>
+
+              <Text ta="center" mt="md">
+                Não tem uma conta?{' '}
+                <Anchor component="button" type="button" onClick={() => router.push('/chooseRole')}>
+                  Cadastre-se
+                </Anchor>
+              </Text>
             </form>
-        </div>
-        </div>
+          </Paper>
+        </Container>
+      </div>
     </div>
   );
 }
