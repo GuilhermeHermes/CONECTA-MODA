@@ -11,7 +11,7 @@ export default function ChooseRolePage() {
 
     const handleRoleSelect = (roleId: string) => {
         updateRegistrationData({ role: roleId });
-        router.push('/cadastro');
+        router.push('/cadastro/aboutYou');
     };
 
     return (

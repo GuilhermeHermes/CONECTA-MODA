@@ -9,6 +9,7 @@ import 'dayjs/locale/pt-br';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import { RegistrationProvider } from '@/contexts/RegistrationContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -34,9 +35,11 @@ export default function RootLayout({
       <body className={inter.className}>
         <MantineProvider theme={theme}>
             <Notifications />
-            <RegistrationProvider>
-              {children}
-            </RegistrationProvider>
+            <AuthProvider>
+              <RegistrationProvider>
+                {children}
+              </RegistrationProvider>
+            </AuthProvider>
         </MantineProvider>
       </body>
     </html>

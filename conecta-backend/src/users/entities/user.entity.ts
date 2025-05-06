@@ -9,6 +9,11 @@ export enum UserRole {
   ENTERPRISE = 'ENTERPRISE',
 }
 
+export enum DocumentType {
+  CPF = 'cpf',
+  CNPJ = 'cnpj',
+}
+
 @Entity()
 export class User {
   @PrimaryColumn()
@@ -30,6 +35,9 @@ export class User {
 
   @Column({ nullable: true })
   name?: string;
+
+  @Column({ type: 'enum', enum: DocumentType, nullable: true })
+  documentType?: DocumentType;
 
   @Column('text', { array: true, default: [] })
   specialties: string[];
@@ -66,6 +74,30 @@ export class User {
 
   @Column({ nullable: true })
   cpf?: string;
+
+  @Column({ nullable: true })
+  dataNascimento?: Date;
+
+  @Column({ nullable: true })
+  genero?: string;
+
+  @Column({ nullable: true })
+  emailProfissional?: string;
+
+  @Column({ nullable: true })
+  telefoneProfissional?: string;
+
+  @Column({ nullable: true })
+  localizacaoProfissional?: string;
+
+  @Column('text', { array: true, default: [] })
+  segmentos: string[];
+
+  @Column('text', { array: true, default: [] })
+  habilidades: string[];
+
+  @Column('text', { array: true, default: [] })
+  produtos: string[];
 
   @OneToOne(() => Address, address => address.user)
   address?: Address;

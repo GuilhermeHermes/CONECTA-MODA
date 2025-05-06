@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import { Address } from './entities/address.entity';
 import { Account } from './entities/account.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -20,12 +21,61 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    // Se não for fornecido um ID, gerar um UUID
+    if (!createUserDto.id) {
+      createUserDto.id = uuidv4();
+    }
+    
+    // Hash da senha se fornecida
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    
+    // Mapear o role do frontend para UserRole enum
+    let roles = createUserDto.roles || [UserRole.DEFAULT];
+    if (createUserDto.role === 'profissional') {
+      roles = [UserRole.PROFESSIONAL];
+    } else if (createUserDto.role === 'fornecedor') {
+      roles = [UserRole.SUPPLIER];
+    } else if (createUserDto.role === 'marca') {
+      roles = [UserRole.ENTERPRISE];
+    }
+    
+    // Construir o objeto de links sociais
+    const socialLinks = {};
+    if (createUserDto.website) socialLinks['website'] = createUserDto.website;
+    if (createUserDto.instagram) socialLinks['instagram'] = createUserDto.instagram;
+    if (createUserDto.facebook) socialLinks['facebook'] = createUserDto.facebook;
+    if (createUserDto.linkedin) socialLinks['linkedin'] = createUserDto.linkedin;
+    
+    // Criar o usuário com todos os dados do formulário
     const user = this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
+      roles,
+      socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : null,
+      hasPhysicalStore: createUserDto.possuiLojaTisica,
+      hasEcommerce: createUserDto.possuiEcommerce,
     });
-    return this.usersRepository.save(user);
+    
+    // Salvar o usuário
+    const savedUser = await this.usersRepository.save(user);
+    
+    // Se fornecido dados de endereço, criar o endereço
+    if (createUserDto.endereco && createUserDto.cidade && createUserDto.estado) {
+      const address = this.addressesRepository.create({
+        id: uuidv4(),
+        userId: savedUser.id,
+        street: createUserDto.endereco,
+        number: createUserDto.numero,
+        bairro: createUserDto.bairro,
+        city: createUserDto.cidade,
+        state: createUserDto.estado,
+        country: createUserDto.pais || 'Brasil',
+        cep: createUserDto.cep || '',
+      });
+      await this.addressesRepository.save(address);
+    }
+    
+    return this.findOne(savedUser.id);
   }
 
   async findAll(): Promise<User[]> {

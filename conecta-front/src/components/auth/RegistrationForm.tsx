@@ -1,10 +1,12 @@
 'use client';
 
-import { TextInput, Button, Group, Stack, Select, NumberInput } from '@mantine/core';
+import { useState, useEffect } from 'react';
+import { TextInput, Button, Group, Stack, Select, NumberInput, PasswordInput, Radio, Text, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { DateInput, DatePicker, DatePickerInput } from '@mantine/dates';
+import { DateInput } from '@mantine/dates';
 import { notifications } from '@mantine/notifications';
-import { useState } from 'react';
+import { useRegistration } from '@/contexts/RegistrationContext';
+
 import '@mantine/dates/styles.css';
 
 interface RegistrationFormData {
@@ -13,6 +15,7 @@ interface RegistrationFormData {
   telefone: string;
   cpf: string;
   cnpj: string;
+  documentType: 'cpf' | 'cnpj';
   dataNascimento: Date | null;
   genero: string;
   endereco: string;
@@ -21,6 +24,9 @@ interface RegistrationFormData {
   cidade: string;
   pais: string;
   estado: string;
+  password: string;
+  confirmPassword: string;
+  role?: 'profissional' | 'marca' | 'fornecedor';
 }
 
 interface RegistrationFormProps {
@@ -29,6 +35,12 @@ interface RegistrationFormProps {
 }
 
 export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormProps) {
+  const { registrationData } = useRegistration();
+  const [documentType, setDocumentType] = useState<'cpf' | 'cnpj'>(
+    (initialValues?.cpf && !initialValues?.cnpj) ? 'cpf' : 
+    (initialValues?.cnpj && !initialValues?.cpf) ? 'cnpj' : 'cpf'
+  );
+
   const form = useForm<RegistrationFormData>({
     initialValues: {
       nome: '',
@@ -36,6 +48,7 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
       telefone: '',
       cpf: '',
       cnpj: '',
+      documentType: 'cpf',
       dataNascimento: null,
       genero: '',
       endereco: '',
@@ -44,6 +57,8 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
       cidade: '',
       pais: '',
       estado: '',
+      password: '',
+      confirmPassword: '',
       ...initialValues,
     },
     validate: {
@@ -52,13 +67,15 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
         const phoneRegex = /^\(\d{2}\) \d{5}-\d{4}$/;
         return phoneRegex.test(value) ? null : 'Telefone deve estar no formato (00) 00000-0000';
       },
-      cpf: (value) => {
-        if (!value) return null;
+      cpf: (value, values) => {
+        if (values.documentType === 'cnpj') return null;
+        if (!value) return 'CPF é obrigatório quando selecionado';
         const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
         return cpfRegex.test(value) ? null : 'CPF deve estar no formato 000.000.000-00';
       },
-      cnpj: (value) => {
-        if (!value) return null;
+      cnpj: (value, values) => {
+        if (values.documentType === 'cpf') return null;
+        if (!value) return 'CNPJ é obrigatório quando selecionado';
         const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
         return cnpjRegex.test(value) ? null : 'CNPJ deve estar no formato 00.000.000/0000-00';
       },
@@ -69,8 +86,20 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
       cidade: (value) => (value.length < 3 ? 'Cidade deve ter pelo menos 3 caracteres' : null),
       pais: (value) => (!value ? 'País é obrigatório' : null),
       estado: (value) => (!value ? 'Estado é obrigatório' : null),
+      password: (value) => (value.length < 6 ? 'A senha deve ter pelo menos 6 caracteres' : null),
+      confirmPassword: (value, values) => 
+        value !== values.password ? 'As senhas não coincidem' : null,
     },
   });
+
+  useEffect(() => {
+    form.setFieldValue('documentType', documentType);
+    if (documentType === 'cpf') {
+      form.setFieldValue('cnpj', '');
+    } else {
+      form.setFieldValue('cpf', '');
+    }
+  }, [documentType]);
 
   const formatPhoneNumber = (value: string) => {
     const numbers = value.replace(/\D/g, '');
@@ -107,8 +136,6 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
       });
     }
   };
-  
-  const [value, setValue] = useState<string | null>(null);
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -127,6 +154,21 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
           required
         />
 
+        <Group grow>
+          <PasswordInput
+            label="Senha"
+            placeholder="Sua senha"
+            {...form.getInputProps('password')}
+            required
+          />
+          <PasswordInput
+            label="Confirmar Senha"
+            placeholder="Confirme sua senha"
+            {...form.getInputProps('confirmPassword')}
+            required
+          />
+        </Group>
+
         <TextInput
           label="Telefone"
           placeholder="(00) 00000-0000"
@@ -138,34 +180,12 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
           required
         />
 
-        <Group grow>
-          <TextInput
-            label="CPF"
-            placeholder="000.000.000-00"
-            {...form.getInputProps('cpf')}
-            onChange={(e) => {
-              const formatted = formatCPF(e.target.value);
-              form.setFieldValue('cpf', formatted);
-            }}
-          />
-          <TextInput
-            label="CNPJ"
-            placeholder="00.000.000/0000-00"
-            {...form.getInputProps('cnpj')}
-            onChange={(e) => {
-              const formatted = formatCNPJ(e.target.value);
-              form.setFieldValue('cnpj', formatted);
-            }}
-          />
-        </Group>
-
-<DatePickerInput
-  label="Data de Nascimento"
-  placeholder="Selecione sua data de nascimento"
-  {...form.getInputProps('dataNascimento')}
-  required
-  maxDate={new Date()}
-/>
+        <DateInput
+          label="Data de nascimento"
+          placeholder="Selecione a data"
+          {...form.getInputProps('dataNascimento')}
+          maxDate={new Date()}
+        />
 
         <Select
           label="Gênero"
@@ -179,6 +199,46 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
           {...form.getInputProps('genero')}
         />
 
+        <Title order={5} mt="lg">Documento</Title>
+        <Radio.Group
+          label="Tipo de documento"
+          description="Escolha apenas um tipo de documento"
+          value={documentType}
+          onChange={(value) => setDocumentType(value as 'cpf' | 'cnpj')}
+          name="documentType"
+          withAsterisk
+        >
+          <Group mt="xs">
+            <Radio value="cpf" label="CPF (Pessoa Física)" />
+            <Radio value="cnpj" label="CNPJ (Pessoa Jurídica)" />
+          </Group>
+        </Radio.Group>
+
+        {documentType === 'cpf' ? (
+          <TextInput
+            label="CPF"
+            placeholder="000.000.000-00"
+            {...form.getInputProps('cpf')}
+            onChange={(e) => {
+              const formatted = formatCPF(e.target.value);
+              form.setFieldValue('cpf', formatted);
+            }}
+            required
+          />
+        ) : (
+          <TextInput
+            label="CNPJ"
+            placeholder="00.000.000/0000-00"
+            {...form.getInputProps('cnpj')}
+            onChange={(e) => {
+              const formatted = formatCNPJ(e.target.value);
+              form.setFieldValue('cnpj', formatted);
+            }}
+            required
+          />
+        )}
+
+        <Title order={5} mt="lg">Endereço</Title>
         <Group grow>
           <TextInput
             label="Endereço"
@@ -254,11 +314,8 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
           />
         </Group>
 
-        <Group justify="space-between" mt="xl">
-          <Button variant="outline" onClick={() => window.history.back()} color="#0E4B82"> 
-            Voltar
-          </Button>
-          <Button type="submit" color="#0E4B82">
+        <Group justify="flex-end" mt="xl">
+          <Button type="submit">
             Próximo
           </Button>
         </Group>

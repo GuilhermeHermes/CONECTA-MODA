@@ -1,9 +1,10 @@
-import { IsEmail, IsString, IsOptional, IsArray, IsBoolean, IsEnum } from 'class-validator';
-import { UserRole } from '../entities/user.entity';
+import { IsEmail, IsString, IsOptional, IsArray, IsBoolean, IsEnum, IsDate, IsObject } from 'class-validator';
+import { UserRole, DocumentType } from '../entities/user.entity';
 
 export class CreateUserDto {
+  @IsOptional()
   @IsString()
-  id: string;
+  id?: string;
 
   @IsEmail()
   email: string;
@@ -11,13 +12,22 @@ export class CreateUserDto {
   @IsString()
   password: string;
 
+  @IsOptional()
   @IsArray()
   @IsEnum(UserRole, { each: true })
-  roles: UserRole[];
+  roles?: UserRole[];
+  
+  @IsOptional()
+  @IsString()
+  role?: 'profissional' | 'marca' | 'fornecedor';
 
   @IsOptional()
   @IsString()
   name?: string;
+  
+  @IsOptional()
+  @IsEnum(DocumentType)
+  documentType?: DocumentType;
 
   @IsOptional()
   @IsArray()
@@ -28,16 +38,25 @@ export class CreateUserDto {
   @IsString()
   miniBio?: string;
 
+  @IsOptional()
   @IsString()
-  phone: string;
+  phone?: string;
 
   @IsOptional()
   @IsBoolean()
   hasPhysicalStore?: boolean;
+  
+  @IsOptional()
+  @IsBoolean()
+  possuiLojaTisica?: boolean;
 
   @IsOptional()
   @IsBoolean()
   hasEcommerce?: boolean;
+  
+  @IsOptional()
+  @IsBoolean()
+  possuiEcommerce?: boolean;
 
   @IsOptional()
   @IsString()
@@ -45,6 +64,22 @@ export class CreateUserDto {
 
   @IsOptional()
   socialLinks?: Record<string, any>;
+  
+  @IsOptional()
+  @IsString()
+  website?: string;
+  
+  @IsOptional()
+  @IsString()
+  instagram?: string;
+  
+  @IsOptional()
+  @IsString()
+  facebook?: string;
+  
+  @IsOptional()
+  @IsString()
+  linkedin?: string;
 
   @IsOptional()
   @IsString()
@@ -57,4 +92,72 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   cpf?: string;
+  
+  @IsOptional()
+  @IsDate()
+  dataNascimento?: Date;
+  
+  @IsOptional()
+  @IsString()
+  genero?: string;
+  
+  @IsOptional()
+  @IsString()
+  emailProfissional?: string;
+  
+  @IsOptional()
+  @IsString()
+  telefoneProfissional?: string;
+  
+  @IsOptional()
+  @IsString()
+  localizacaoProfissional?: string;
+  
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  segmentos?: string[];
+  
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  habilidades?: string[];
+  
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  produtos?: string[];
+  
+  // Campos para endereço
+  @IsOptional()
+  @IsString()
+  endereco?: string;
+  
+  @IsOptional()
+  @IsString()
+  numero?: string;
+  
+  @IsOptional()
+  @IsString()
+  bairro?: string;
+  
+  @IsOptional()
+  @IsString()
+  cidade?: string;
+  
+  @IsOptional()
+  @IsString()
+  estado?: string;
+  
+  @IsOptional()
+  @IsString()
+  pais?: string;
+  
+  @IsOptional()
+  @IsString()
+  cep?: string;
+  
+  @IsOptional()
+  @IsString()
+  telefone?: string;
 } 
