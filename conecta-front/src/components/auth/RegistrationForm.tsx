@@ -32,6 +32,51 @@ interface RegistrationFormProps {
   initialValues?: Partial<RegistrationFormData>;
 }
 
+const ESTADOS_BRASIL = [
+  { value: 'AC', label: 'Acre' },
+  { value: 'AL', label: 'Alagoas' },
+  { value: 'AP', label: 'Amapá' },
+  { value: 'AM', label: 'Amazonas' },
+  { value: 'BA', label: 'Bahia' },
+  { value: 'CE', label: 'Ceará' },
+  { value: 'DF', label: 'Distrito Federal' },
+  { value: 'ES', label: 'Espírito Santo' },
+  { value: 'GO', label: 'Goiás' },
+  { value: 'MA', label: 'Maranhão' },
+  { value: 'MT', label: 'Mato Grosso' },
+  { value: 'MS', label: 'Mato Grosso do Sul' },
+  { value: 'MG', label: 'Minas Gerais' },
+  { value: 'PA', label: 'Pará' },
+  { value: 'PB', label: 'Paraíba' },
+  { value: 'PR', label: 'Paraná' },
+  { value: 'PE', label: 'Pernambuco' },
+  { value: 'PI', label: 'Piauí' },
+  { value: 'RJ', label: 'Rio de Janeiro' },
+  { value: 'RN', label: 'Rio Grande do Norte' },
+  { value: 'RS', label: 'Rio Grande do Sul' },
+  { value: 'RO', label: 'Rondônia' },
+  { value: 'RR', label: 'Roraima' },
+  { value: 'SC', label: 'Santa Catarina' },
+  { value: 'SP', label: 'São Paulo' },
+  { value: 'SE', label: 'Sergipe' },
+  { value: 'TO', label: 'Tocantins' }
+];
+
+const PAISES = [
+  { value: 'Brasil', label: 'Brasil' },
+  { value: 'Argentina', label: 'Argentina' },
+  { value: 'Bolivia', label: 'Bolívia' },
+  { value: 'Chile', label: 'Chile' },
+  { value: 'Colombia', label: 'Colômbia' },
+  { value: 'Equador', label: 'Equador' },
+  { value: 'Guiana', label: 'Guiana' },
+  { value: 'Paraguai', label: 'Paraguai' },
+  { value: 'Peru', label: 'Peru' },
+  { value: 'Suriname', label: 'Suriname' },
+  { value: 'Uruguai', label: 'Uruguai' },
+  { value: 'Venezuela', label: 'Venezuela' }
+];
+
 export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormProps) {
   const { registrationData } = useRegistration();
   const [documentType, setDocumentType] = useState<'cpf' | 'cnpj'>(
@@ -262,9 +307,11 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
         </Group>
 
         <Group grow>
-          <TextInput
+          <Select
             label="Estado"
-            placeholder="Seu estado"
+            placeholder="Selecione seu estado"
+            data={ESTADOS_BRASIL}
+            searchable
             {...form.getInputProps('estado')}
             required
           />
@@ -280,9 +327,11 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
           />
         </Group>
 
-        <TextInput
+        <Select
           label="País"
-          placeholder="Seu país"
+          placeholder="Selecione seu país"
+          data={PAISES}
+          searchable
           {...form.getInputProps('pais')}
           required
         />
