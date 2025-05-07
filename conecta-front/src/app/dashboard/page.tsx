@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Container, Title, Text, Button, Group, Paper, Card, Avatar, SimpleGrid, Loader, Badge } from '@mantine/core';
 import axios from 'axios';
 import { useAuth } from '@/contexts/AuthContext';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { config } from '@/config';
 
 interface UserCard {
   id: string;
@@ -39,13 +38,13 @@ export default function DashboardPage() {
     try {
       if (user?.roles?.includes('enterprise')) {
         // Buscar profissionais
-        const professionalRes = await axios.get(`${API_URL}/users/professionals`, {
+        const professionalRes = await axios.get(`${config.api.baseURL}/users/professionals`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProfessionals(professionalRes.data);
         
         // Buscar fornecedores
-        const supplierRes = await axios.get(`${API_URL}/users/suppliers`, {
+        const supplierRes = await axios.get(`${config.api.baseURL}/users/suppliers`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setSuppliers(supplierRes.data);

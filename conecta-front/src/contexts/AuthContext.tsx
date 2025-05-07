@@ -4,6 +4,8 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import { config } from '@/config';
+
 
 interface AuthContextType {
   user: any;
@@ -18,7 +20,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<any>(null);
@@ -39,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserProfile = async (authToken: string) => {
     try {
-      const response = await axios.get(`${API_URL}/auth/profile`, {
+      const response = await axios.get(`${config.api.baseURL}/auth/profile`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -56,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const response = await axios.post(`${API_URL}/auth/login`, {
+      const response = await axios.post(`${config.api.baseURL}/auth/login`, {
         email,
         password,
       });
@@ -80,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (userData: any) => {
     try {
       setIsLoading(true);
-      const response = await axios.post(`${API_URL}/auth/register`, userData);
+      const response = await axios.post(`${config.api.baseURL}/auth/register`, userData);
       
       const { access_token, user } = response.data;
       
@@ -107,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogle = () => {
     console.log('Redirecting to Google login...');
-    window.location.href = `${API_URL}/auth/google`;
+    window.location.href = `${config.api.baseURL}/auth/google`;
   };
 
   return (

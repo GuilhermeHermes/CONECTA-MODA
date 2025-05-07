@@ -4,7 +4,7 @@ import { TextInput, Button, Group, Stack, Textarea, MultiSelect, Switch, Title, 
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import { useState, useEffect } from 'react';
-import { useRegistration } from '@/contexts/RegistrationContext';
+import { useUser } from '@/contexts/UserContext';
 import { ProfileImageUpload } from '@/components/ui/ProfileImageUpload';
 
 interface SocialLinks {
@@ -43,52 +43,49 @@ const SEGMENTOS_DATA = [
   { value: 'feminino', label: 'Feminino' },
   { value: 'masculino', label: 'Masculino' },
   { value: 'infantil', label: 'Infantil' },
-  { value: 'plus-size', label: 'Plus Size' },
   { value: 'moda-praia', label: 'Moda Praia' },
-  { value: 'fitness', label: 'Fitness/Esportivo' },
-  { value: 'jeans', label: 'Jeanswear' },
-  { value: 'underwear', label: 'Underwear/Lingerie' },
-  { value: 'pet', label: 'Pet' },
-  { value: 'outros', label: 'Outros' }
+  { value: 'plus-size', label: 'Plus Size' },
+  { value: 'casual', label: 'Casual' },
+  { value: 'formal', label: 'Formal' },
+  { value: 'esportivo', label: 'Esportivo' },
+  { value: 'luxo', label: 'Luxo' },
+  { value: 'sustentavel', label: 'Sustentável' },
 ];
 
 const HABILIDADES_DATA = [
-  { value: 'costura', label: 'Costura' },
   { value: 'modelagem', label: 'Modelagem' },
-  { value: 'pilotagem', label: 'Pilotagem' },
-  { value: 'estilismo', label: 'Estilismo' },
-  { value: 'desenho', label: 'Desenho de Moda' },
-  { value: 'estamparia', label: 'Estamparia' },
+  { value: 'costura', label: 'Costura' },
+  { value: 'estampagem', label: 'Estampagem' },
   { value: 'bordado', label: 'Bordado' },
-  { value: 'crochet', label: 'Crochê' },
-  { value: 'tricot', label: 'Tricô' },
-  { value: 'gestao', label: 'Gestão de Produção' },
-  { value: 'corte', label: 'Corte e Enfesto' },
-  { value: 'acabamento', label: 'Acabamento' },
-  { value: 'outros', label: 'Outros' }
+  { value: 'design', label: 'Design' },
+  { value: 'padronagem', label: 'Padronagem' },
+  { value: 'acessórios', label: 'Acessórios' },
+  { value: 'consultoria', label: 'Consultoria' },
+  { value: 'produção', label: 'Produção' },
+  { value: 'desenvolvimento', label: 'Desenvolvimento' },
 ];
 
 const PRODUTOS_DATA = [
   { value: 'tecidos', label: 'Tecidos' },
   { value: 'aviamentos', label: 'Aviamentos' },
-  { value: 'estamparia', label: 'Serviços de Estamparia' },
-  { value: 'bordado', label: 'Serviços de Bordado' },
+  { value: 'estampas', label: 'Estampas' },
   { value: 'embalagens', label: 'Embalagens' },
   { value: 'etiquetas', label: 'Etiquetas' },
-  { value: 'maquinas', label: 'Máquinas e Equipamentos' },
-  { value: 'manequins', label: 'Manequins' },
-  { value: 'acabamento', label: 'Materiais de Acabamento' },
-  { value: 'outros', label: 'Outros' }
+  { value: 'acessórios', label: 'Acessórios' },
+  { value: 'maquinas', label: 'Máquinas' },
+  { value: 'ferramentas', label: 'Ferramentas' },
+  { value: 'materiais', label: 'Materiais' },
+  { value: 'outros', label: 'Outros' },
 ];
 
 export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormProps) {
-  const { registrationData } = useRegistration();
+  const { user } = useUser();
   const [showEcommerce, setShowEcommerce] = useState(initialValues?.possuiEcommerce || false);
   const [showLoja, setShowLoja] = useState(initialValues?.possuiLojaTisica || false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(initialValues?.profileImageUrl || null);
   
-  const role = registrationData.role || '';
+  const role = user?.roles?.[0]?.toLowerCase() || '';
   
   let professionalNameLabel = 'Nome Profissional';
   let professionalNamePlaceholder = 'Digite seu nome profissional';
@@ -325,7 +322,7 @@ export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormPr
             Voltar
           </Button>
           <Button type="submit" color="blue">
-            Finalizar Cadastro
+            Salvar Alterações
           </Button>
         </Group>
       </Stack>

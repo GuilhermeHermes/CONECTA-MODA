@@ -10,6 +10,7 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import { RegistrationProvider } from '@/contexts/RegistrationContext';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { UserProvider } from '@/contexts/UserContext';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -36,9 +37,11 @@ export default function RootLayout({
         <MantineProvider theme={theme}>
             <Notifications />
             <AuthProvider>
-              <RegistrationProvider>
-                {children}
-              </RegistrationProvider>
+              <UserProvider>
+                <RegistrationProvider>
+                  {children}
+                </RegistrationProvider>
+              </UserProvider>
             </AuthProvider>
         </MantineProvider>
       </body>
