@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
 import { IconMapPin, IconPhone, IconAt, IconWorld, IconBrandInstagram, IconBrandFacebook, IconBrandLinkedin, IconListCheck } from '@tabler/icons-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import { config } from '@/config';
 
 interface UserProfile {
   id: string;
@@ -45,7 +45,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
       if (!token) return;
 
       try {
-        const response = await axios.get(`${API_URL}/users/${params.id}`, {
+        const response = await axios.get(`${config.api.baseURL}/users/${params.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProfile(response.data);
