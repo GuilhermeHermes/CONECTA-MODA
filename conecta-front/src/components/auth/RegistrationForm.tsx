@@ -53,7 +53,7 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
       numero: '',
       bairro: '',
       cidade: '',
-      pais: '',
+      pais: 'Brasil',
       estado: '',
       cep: '',
       ...initialValues,
@@ -283,18 +283,12 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
         <TextInput
           label="País"
           placeholder="Seu país"
-          defaultValue="Brasil"
           {...form.getInputProps('pais')}
           required
         />
 
-        <Group justify="space-between" mt="xl">
-          <Button variant="outline" onClick={() => window.history.back()}>
-            Voltar
-          </Button>
-          <Button type="submit" color="blue">
-            Salvar Alterações
-          </Button>
+        <Group justify="flex-end" mt="md">
+          <Button type="submit">Próximo</Button>
         </Group>
       </Stack>
     </form>

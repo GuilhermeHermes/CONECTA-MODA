@@ -19,7 +19,7 @@ interface UserCard {
 }
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, isLoading, logout, token } = useAuth();
+  const { user, isAuthenticated, isLoading, token } = useAuth();
   const router = useRouter();
   const [professionals, setProfessionals] = useState<UserCard[]>([]);
   const [suppliers, setSuppliers] = useState<UserCard[]>([]);
@@ -201,10 +201,6 @@ export default function DashboardPage() {
               }
             </Text>
           </div>
-          <Group>
-            <Button variant="outline" onClick={() => router.push('/profile/edit')}>Meu Perfil</Button>
-            <Button color="red" onClick={logout}>Sair</Button>
-          </Group>
         </Group>
       </Paper>
       
