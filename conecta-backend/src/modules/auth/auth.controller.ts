@@ -28,7 +28,8 @@ export class AuthController {
   @Get('profile')
   async getProfile(@Req() req) {
     const user = await this.usersService.findOne(req.user.id);
-    return user;
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   @Get('google')

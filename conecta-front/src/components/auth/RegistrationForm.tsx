@@ -24,9 +24,7 @@ interface RegistrationFormData {
   cidade: string;
   pais: string;
   estado: string;
-  password: string;
-  confirmPassword: string;
-  role?: 'profissional' | 'marca' | 'fornecedor';
+  cep: string;
 }
 
 interface RegistrationFormProps {
@@ -57,8 +55,7 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
       cidade: '',
       pais: '',
       estado: '',
-      password: '',
-      confirmPassword: '',
+      cep: '',
       ...initialValues,
     },
     validate: {
@@ -86,9 +83,11 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
       cidade: (value) => (value.length < 3 ? 'Cidade deve ter pelo menos 3 caracteres' : null),
       pais: (value) => (!value ? 'País é obrigatório' : null),
       estado: (value) => (!value ? 'Estado é obrigatório' : null),
-      password: (value) => (value.length < 6 ? 'A senha deve ter pelo menos 6 caracteres' : null),
-      confirmPassword: (value, values) => 
-        value !== values.password ? 'As senhas não coincidem' : null,
+      cep: (value) => {
+        if (!value) return 'CEP é obrigatório';
+        const cepRegex = /^\d{5}-\d{3}$/;
+        return cepRegex.test(value) ? null : 'CEP deve estar no formato 00000-000';
+      },
     },
   });
 
@@ -125,6 +124,14 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
     return value;
   };
 
+  const formatCEP = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 8) {
+      return numbers.replace(/(\d{5})(\d{3})/, '$1-$2');
+    }
+    return value;
+  };
+
   const handleSubmit = (values: RegistrationFormData) => {
     try {
       onSubmit(values);
@@ -153,21 +160,6 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
           {...form.getInputProps('email')}
           required
         />
-
-        <Group grow>
-          <PasswordInput
-            label="Senha"
-            placeholder="Sua senha"
-            {...form.getInputProps('password')}
-            required
-          />
-          <PasswordInput
-            label="Confirmar Senha"
-            placeholder="Confirme sua senha"
-            {...form.getInputProps('confirmPassword')}
-            required
-          />
-        </Group>
 
         <TextInput
           label="Telefone"
@@ -270,53 +262,38 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
         </Group>
 
         <Group grow>
-          <Select
-            label="País"
-            placeholder="Selecione"
-            data={[
-              { value: 'brasil', label: 'Brasil' },
-              { value: 'portugal', label: 'Portugal' },
-              { value: 'outro', label: 'Outro' },
-            ]}
-            {...form.getInputProps('pais')}
+          <TextInput
+            label="Estado"
+            placeholder="Seu estado"
+            {...form.getInputProps('estado')}
             required
           />
-          <Select
-            label="Estado"
-            placeholder="Selecione"
-            data={[
-              { value: 'ac', label: 'Acre' },
-              { value: 'al', label: 'Alagoas' },
-              { value: 'ap', label: 'Amapá' },
-              { value: 'am', label: 'Amazonas' },
-              { value: 'ba', label: 'Bahia' },
-              { value: 'ce', label: 'Ceará' },
-              { value: 'df', label: 'Distrito Federal' },
-              { value: 'es', label: 'Espírito Santo' },
-              { value: 'go', label: 'Goiás' },
-              { value: 'ma', label: 'Maranhão' },
-              { value: 'mt', label: 'Mato Grosso' },
-              { value: 'ms', label: 'Mato Grosso do Sul' },
-              { value: 'mg', label: 'Minas Gerais' },
-              { value: 'pa', label: 'Pará' },
-              { value: 'pb', label: 'Paraíba' },
-              { value: 'pr', label: 'Paraná' },
-              { value: 'pe', label: 'Pernambuco' },
-              { value: 'sp', label: 'São Paulo' },
-              { value: 'rj', label: 'Rio de Janeiro' },
-              { value: 'rn', label: 'Rio Grande do Norte' },
-              { value: 'rs', label: 'Rio Grande do Sul' },
-              { value: 'se', label: 'Sergipe' },
-              { value: 'to', label: 'Tocantins' },
-            ]}
-            {...form.getInputProps('estado')}
+          <TextInput
+            label="CEP"
+            placeholder="00000-000"
+            {...form.getInputProps('cep')}
+            onChange={(e) => {
+              const formatted = formatCEP(e.target.value);
+              form.setFieldValue('cep', formatted);
+            }}
             required
           />
         </Group>
 
-        <Group justify="flex-end" mt="xl">
-          <Button type="submit">
-            Próximo
+        <TextInput
+          label="País"
+          placeholder="Seu país"
+          defaultValue="Brasil"
+          {...form.getInputProps('pais')}
+          required
+        />
+
+        <Group justify="space-between" mt="xl">
+          <Button variant="outline" onClick={() => window.history.back()}>
+            Voltar
+          </Button>
+          <Button type="submit" color="blue">
+            Salvar Alterações
           </Button>
         </Group>
       </Stack>

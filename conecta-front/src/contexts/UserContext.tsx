@@ -11,6 +11,8 @@ interface User {
   telefone: string;
   genero: string;
   dataNascimento: Date | null;
+  cpf: string;
+  cnpj: string;
   professionalName: string;
   emailProfissional: string;
   telefoneProfissional: string;
@@ -63,6 +65,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       setError(null);
       const userData = await userService.getCurrentUser();
+      console.log('Dados brutos do backend:', userData);
       
       // Mapear os dados do usuário para o formato esperado
       const mappedUserData: User = {
@@ -72,6 +75,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         telefone: userData.telefone || '',
         genero: userData.genero || '',
         dataNascimento: userData.dataNascimento ? new Date(userData.dataNascimento) : null,
+        cpf: userData.cpf || '',
+        cnpj: userData.cnpj || '',
         professionalName: userData.professionalName || '',
         emailProfissional: userData.emailProfissional || '',
         telefoneProfissional: userData.telefoneProfissional || '',
@@ -97,11 +102,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cep: userData.cep || '',
       };
       
+      console.log('Dados mapeados para o frontend:', mappedUserData);
       setUser(mappedUserData);
     } catch (err) {
       console.error('Error fetching user data:', err);
       setError('Failed to load user data');
       if (authUser) {
+        console.log('Usando dados do authUser como fallback:', authUser);
         setUser(authUser as User);
       }
     } finally {
@@ -124,12 +131,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profilePicture: data.profileImageUrl,
       };
       
+      console.log('Dados sendo enviados para o backend:', mappedData);
       const updatedUser = await userService.updateUser(mappedData);
+      console.log('Dados retornados do backend após atualização:', updatedUser);
       
       // Atualizar o estado com os dados retornados
       setUser(prevUser => {
         if (!prevUser) return null;
-        return {
+        const newUser = {
           ...prevUser,
           ...updatedUser,
           // Campos pessoais
@@ -138,6 +147,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           telefone: updatedUser.telefone || prevUser.telefone,
           genero: updatedUser.genero || prevUser.genero,
           dataNascimento: updatedUser.dataNascimento ? new Date(updatedUser.dataNascimento) : prevUser.dataNascimento,
+          cpf: updatedUser.cpf || prevUser.cpf,
+          cnpj: updatedUser.cnpj || prevUser.cnpj,
           
           // Campos profissionais
           professionalName: updatedUser.professionalName || prevUser.professionalName,
@@ -165,6 +176,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           pais: updatedUser.pais || prevUser.pais,
           cep: updatedUser.cep || prevUser.cep,
         };
+        console.log('Novo estado do usuário após atualização:', newUser);
+        return newUser;
       });
     } catch (err) {
       console.error('Error updating user:', err);

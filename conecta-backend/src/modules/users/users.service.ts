@@ -23,7 +23,46 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+    console.log('Buscando usuário com ID:', id);
+    const user = await this.usersRepository.findOne({ 
+      where: { id },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        telefone: true,
+        genero: true,
+        dataNascimento: true,
+        cpf: true,
+        cnpj: true,
+        endereco: true,
+        numero: true,
+        bairro: true,
+        cidade: true,
+        estado: true,
+        pais: true,
+        cep: true,
+        professionalName: true,
+        emailProfissional: true,
+        telefoneProfissional: true,
+        miniBio: true,
+        localizacaoProfissional: true,
+        segmentos: true,
+        habilidades: true,
+        produtos: true,
+        website: true,
+        instagram: true,
+        facebook: true,
+        linkedin: true,
+        possuiLojaTisica: true,
+        possuiEcommerce: true,
+        profileImageUrl: true,
+        roles: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+    console.log('Usuário encontrado:', user);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }

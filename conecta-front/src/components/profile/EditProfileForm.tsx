@@ -27,6 +27,7 @@ interface RegistrationFormData {
   password: string;
   confirmPassword: string;
   role?: 'profissional' | 'marca' | 'fornecedor';
+  cep: string;
 }
 
 interface ProfessionalFormData {
@@ -170,6 +171,16 @@ export function EditProfileForm() {
               telefone: user.telefone,
               genero: user.genero,
               dataNascimento: user.dataNascimento ? new Date(user.dataNascimento) : null,
+              cpf: user.cpf,
+              cnpj: user.cnpj,
+              documentType: user.cpf ? 'cpf' : 'cnpj',
+              endereco: user.endereco,
+              numero: user.numero,
+              bairro: user.bairro,
+              cidade: user.cidade,
+              estado: user.estado,
+              pais: user.pais,
+              cep: user.cep,
             }}
           />
         </Tabs.Panel>
