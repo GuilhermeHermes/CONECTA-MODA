@@ -22,6 +22,7 @@ export default function AuthCallbackPage() {
     } else {
       // Redirect to login if no token
       setTimeout(() => {
+        console.log('Redirecting to login');  
         router.push('/');
       }, 2000);
     }

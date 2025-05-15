@@ -1,201 +1,224 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { TextInput, Button, Group, Stack, Select, NumberInput, PasswordInput, Radio, Text, Title } from '@mantine/core';
+import React, { useState, useCallback, useMemo } from 'react';
+import { TextInput, Button, Group, Stack, Select, PasswordInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { DateInput } from '@mantine/dates';
 import { notifications } from '@mantine/notifications';
 import { useRegistration } from '@/contexts/RegistrationContext';
+import dayjs from 'dayjs';
+import 'dayjs/locale/pt-br';
+import { AddressForm } from '../address/AddressForm';
 
 import '@mantine/dates/styles.css';
 
-interface RegistrationFormData {
-  nome: string;
+dayjs.locale('pt-br');
+
+export interface PersonalFormData {
+  name: string;
   email: string;
-  telefone: string;
-  cpf: string;
-  cnpj: string;
+  password: string;
+  confirmPassword: string;
   documentType: 'cpf' | 'cnpj';
-  dataNascimento: Date | null;
-  genero: string;
-  endereco: string;
-  numero: string;
-  bairro: string;
-  cidade: string;
-  pais: string;
-  estado: string;
-  cep: string;
+  documentNumber: string;
+  birthDate: Date | null;
+  phone: string;
+  gender: string;
+  address: {
+    cep: string;
+    street: string;
+    number: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+  };
 }
 
 interface RegistrationFormProps {
-  onSubmit: (values: RegistrationFormData) => void;
-  initialValues?: Partial<RegistrationFormData>;
+  onSubmit?: (values: PersonalFormData) => void;
+  initialValues?: Partial<PersonalFormData>;
 }
 
-const ESTADOS_BRASIL = [
-  { value: 'AC', label: 'Acre' },
-  { value: 'AL', label: 'Alagoas' },
-  { value: 'AP', label: 'Amapá' },
-  { value: 'AM', label: 'Amazonas' },
-  { value: 'BA', label: 'Bahia' },
-  { value: 'CE', label: 'Ceará' },
-  { value: 'DF', label: 'Distrito Federal' },
-  { value: 'ES', label: 'Espírito Santo' },
-  { value: 'GO', label: 'Goiás' },
-  { value: 'MA', label: 'Maranhão' },
-  { value: 'MT', label: 'Mato Grosso' },
-  { value: 'MS', label: 'Mato Grosso do Sul' },
-  { value: 'MG', label: 'Minas Gerais' },
-  { value: 'PA', label: 'Pará' },
-  { value: 'PB', label: 'Paraíba' },
-  { value: 'PR', label: 'Paraná' },
-  { value: 'PE', label: 'Pernambuco' },
-  { value: 'PI', label: 'Piauí' },
-  { value: 'RJ', label: 'Rio de Janeiro' },
-  { value: 'RN', label: 'Rio Grande do Norte' },
-  { value: 'RS', label: 'Rio Grande do Sul' },
-  { value: 'RO', label: 'Rondônia' },
-  { value: 'RR', label: 'Roraima' },
-  { value: 'SC', label: 'Santa Catarina' },
-  { value: 'SP', label: 'São Paulo' },
-  { value: 'SE', label: 'Sergipe' },
-  { value: 'TO', label: 'Tocantins' }
-];
-
-const PAISES = [
-  { value: 'Brasil', label: 'Brasil' },
-  { value: 'Argentina', label: 'Argentina' },
-  { value: 'Bolivia', label: 'Bolívia' },
-  { value: 'Chile', label: 'Chile' },
-  { value: 'Colombia', label: 'Colômbia' },
-  { value: 'Equador', label: 'Equador' },
-  { value: 'Guiana', label: 'Guiana' },
-  { value: 'Paraguai', label: 'Paraguai' },
-  { value: 'Peru', label: 'Peru' },
-  { value: 'Suriname', label: 'Suriname' },
-  { value: 'Uruguai', label: 'Uruguai' },
-  { value: 'Venezuela', label: 'Venezuela' }
-];
-
 export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormProps) {
-  const { registrationData } = useRegistration();
-  const [documentType, setDocumentType] = useState<'cpf' | 'cnpj'>(
-    (initialValues?.cpf && !initialValues?.cnpj) ? 'cpf' : 
-    (initialValues?.cnpj && !initialValues?.cpf) ? 'cnpj' : 'cpf'
-  );
+  const { registrationData, updateRegistrationData } = useRegistration();
+  const [loading, setLoading] = useState(false);
 
-  const form = useForm<RegistrationFormData>({
+  const form = useForm<PersonalFormData>({
     initialValues: {
-      nome: '',
+      name: '',
       email: '',
-      telefone: '',
-      cpf: '',
-      cnpj: '',
+      password: '',
+      confirmPassword: '',
       documentType: 'cpf',
-      dataNascimento: null,
-      genero: '',
-      endereco: '',
-      numero: '',
-      bairro: '',
-      cidade: '',
-      pais: 'Brasil',
-      estado: '',
-      cep: '',
+      documentNumber: '',
+      birthDate: null,
+      phone: '',
+      gender: '',
+      address: {
+        cep: '',
+        street: '',
+        number: '',
+        neighborhood: '',
+        city: '',
+        state: '',
+      },
       ...initialValues,
     },
     validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Email inválido'),
-      telefone: (value) => {
-        const phoneRegex = /^\(\d{2}\) \d{5}-\d{4}$/;
-        return phoneRegex.test(value) ? null : 'Telefone deve estar no formato (00) 00000-0000';
+      name: (value) => (!value ? 'Nome é obrigatório' : null),
+      email: (value) => {
+        if (!value) return 'Email é obrigatório';
+        if (!/^\S+@\S+$/.test(value)) return 'Email inválido';
+        return null;
       },
-      cpf: (value, values) => {
-        if (values.documentType === 'cnpj') return null;
-        if (!value) return 'CPF é obrigatório quando selecionado';
-        const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
-        return cpfRegex.test(value) ? null : 'CPF deve estar no formato 000.000.000-00';
+      password: (value) => {
+        if (!value) return 'Senha é obrigatória';
+        if (value.length < 6) return 'Senha deve ter pelo menos 6 caracteres';
+        return null;
       },
-      cnpj: (value, values) => {
-        if (values.documentType === 'cpf') return null;
-        if (!value) return 'CNPJ é obrigatório quando selecionado';
-        const cnpjRegex = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
-        return cnpjRegex.test(value) ? null : 'CNPJ deve estar no formato 00.000.000/0000-00';
+      confirmPassword: (value, values) => {
+        if (!value) return 'Confirmação de senha é obrigatória';
+        if (value !== values.password) return 'As senhas não coincidem';
+        return null;
       },
-      nome: (value) => (value.length < 3 ? 'Nome deve ter pelo menos 3 caracteres' : null),
-      endereco: (value) => (value.length < 5 ? 'Endereço deve ter pelo menos 5 caracteres' : null),
-      numero: (value) => (!value ? 'Número é obrigatório' : null),
-      bairro: (value) => (value.length < 3 ? 'Bairro deve ter pelo menos 3 caracteres' : null),
-      cidade: (value) => (value.length < 3 ? 'Cidade deve ter pelo menos 3 caracteres' : null),
-      pais: (value) => (!value ? 'País é obrigatório' : null),
-      estado: (value) => (!value ? 'Estado é obrigatório' : null),
-      cep: (value) => {
-        if (!value) return 'CEP é obrigatório';
-        const cepRegex = /^\d{5}-\d{3}$/;
-        return cepRegex.test(value) ? null : 'CEP deve estar no formato 00000-000';
+      documentNumber: (value, values) => {
+        if (!value) return 'Documento é obrigatório';
+        const cleanDoc = value.replace(/\D/g, '');
+        if (values.documentType === 'cpf' && cleanDoc.length !== 11) {
+          return 'CPF inválido';
+        }
+        if (values.documentType === 'cnpj' && cleanDoc.length !== 14) {
+          return 'CNPJ inválido';
+        }
+        return null;
+      },
+      birthDate: (value) => {
+        if (!value) return 'Data de nascimento é obrigatória';
+        const age = dayjs().diff(dayjs(value), 'year');
+        if (age < 18) return 'Você deve ter pelo menos 18 anos';
+        return null;
+      },
+      phone: (value) => {
+        if (!value) return 'Telefone é obrigatório';
+        const cleanPhone = value.replace(/\D/g, '');
+        if (cleanPhone.length < 10) return 'Telefone inválido';
+        return null;
       },
     },
   });
 
-  useEffect(() => {
-    form.setFieldValue('documentType', documentType);
-    if (documentType === 'cpf') {
-      form.setFieldValue('cnpj', '');
+  // Função para formatar documento sem causar loops infinitos
+  const formatDocumentNumber = useCallback((value: string, type: 'cpf' | 'cnpj') => {
+    const numbers = value.replace(/\D/g, '');
+    
+    if (type === 'cpf') {
+      // Limita a 11 dígitos para CPF
+      const limitedCpf = numbers.slice(0, 11);
+      
+      if (limitedCpf.length <= 3) return limitedCpf;
+      if (limitedCpf.length <= 6) return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(3)}`;
+      if (limitedCpf.length <= 9) return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(3, 6)}.${limitedCpf.slice(6)}`;
+      return `${limitedCpf.slice(0, 3)}.${limitedCpf.slice(3, 6)}.${limitedCpf.slice(6, 9)}-${limitedCpf.slice(9, 11)}`;
+    } 
+    else { // CNPJ
+      // Limita a 14 dígitos para CNPJ
+      const limitedCnpj = numbers.slice(0, 14);
+      
+      if (limitedCnpj.length <= 2) return limitedCnpj;
+      if (limitedCnpj.length <= 5) return `${limitedCnpj.slice(0, 2)}.${limitedCnpj.slice(2)}`;
+      if (limitedCnpj.length <= 8) return `${limitedCnpj.slice(0, 2)}.${limitedCnpj.slice(2, 5)}.${limitedCnpj.slice(5)}`;
+      if (limitedCnpj.length <= 12) return `${limitedCnpj.slice(0, 2)}.${limitedCnpj.slice(2, 5)}.${limitedCnpj.slice(5, 8)}/${limitedCnpj.slice(8)}`;
+      return `${limitedCnpj.slice(0, 2)}.${limitedCnpj.slice(2, 5)}.${limitedCnpj.slice(5, 8)}/${limitedCnpj.slice(8, 12)}-${limitedCnpj.slice(12)}`;
+    }
+  }, []);
+
+  // Manipulador para mudança no documento - CORRIGIDO para evitar loops infinitos
+  const handleDocumentChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    
+    // Formatação direta sem dependência de form.values.documentNumber
+    const formatted = formatDocumentNumber(inputValue, form.values.documentType);
+    form.setFieldValue('documentNumber', formatted);
+  }, [form.values.documentType, formatDocumentNumber, form]);
+
+  // Manipulador para mudança no tipo de documento
+  const handleDocumentTypeChange = useCallback((value: string | null) => {
+    if (!value) return;
+    
+    // Primeiro, definimos o tipo
+    form.setFieldValue('documentType', value as 'cpf' | 'cnpj');
+    
+    // Em seguida, reformatar o número do documento existente para o novo tipo
+    const currentDocNumber = form.values.documentNumber;
+    const onlyNumbers = currentDocNumber.replace(/\D/g, '');
+    
+    // Reformatar o valor existente com base no novo tipo
+    if (onlyNumbers) {
+      const formatted = formatDocumentNumber(onlyNumbers, value as 'cpf' | 'cnpj');
+      form.setFieldValue('documentNumber', formatted);
     } else {
-      form.setFieldValue('cpf', '');
+      // Se não houver número, apenas limpe o campo
+      form.setFieldValue('documentNumber', '');
     }
-  }, [documentType]);
+  }, [form, formatDocumentNumber]);
 
-  const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 11) {
-      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+  // Função para formatar telefone
+  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 11);
+    
+    let formatted;
+    if (value.length <= 2) {
+      formatted = value;
+    } else if (value.length <= 7) {
+      formatted = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+    } else {
+      formatted = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
     }
-    return value;
-  };
+    
+    form.setFieldValue('phone', formatted);
+  }, [form]);
 
-  const formatCPF = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 11) {
-      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  // Handler para endereço - modificado para evitar loops infinitos
+  const handleAddressChange = useCallback((address: any) => {
+    // Verifica se o endereço realmente mudou antes de atualizar
+    if (JSON.stringify(address) !== JSON.stringify(form.values.address)) {
+      form.setFieldValue('address', address);
     }
-    return value;
-  };
+  }, [form]);
 
-  const formatCNPJ = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 14) {
-      return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-    }
-    return value;
-  };
-
-  const formatCEP = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
-    if (numbers.length <= 8) {
-      return numbers.replace(/(\d{5})(\d{3})/, '$1-$2');
-    }
-    return value;
-  };
-
-  const handleSubmit = (values: RegistrationFormData) => {
+  const handleSubmit = async (values: PersonalFormData) => {
     try {
-      onSubmit(values);
+      setLoading(true);
+      
+      // Atualiza o contexto global se disponível
+      if (updateRegistrationData) {
+        updateRegistrationData(values);
+      }
+      
+      if (onSubmit) {
+        await onSubmit(values);
+      }
     } catch (error) {
+      console.error('Erro ao registrar:', error);
       notifications.show({
-        title: 'Erro ao enviar formulário',
-        message: 'Ocorreu um erro ao processar o formulário. Tente novamente.',
+        title: 'Erro ao registrar',
+        message: 'Ocorreu um erro ao processar o registro. Tente novamente mais tarde.',
         color: 'red',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack>
+        <Title order={2}>Informações Pessoais</Title>
+
         <TextInput
-          label="Nome"
+          label="Nome Completo"
           placeholder="Seu nome completo"
-          {...form.getInputProps('nome')}
+          {...form.getInputProps('name')}
           required
         />
 
@@ -206,140 +229,86 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
           required
         />
 
-        <TextInput
-          label="Telefone"
-          placeholder="(00) 00000-0000"
-          {...form.getInputProps('telefone')}
-          onChange={(e) => {
-            const formatted = formatPhoneNumber(e.target.value);
-            form.setFieldValue('telefone', formatted);
-          }}
-          required
-        />
-
-        <DateInput
-          label="Data de nascimento"
-          placeholder="Selecione a data"
-          {...form.getInputProps('dataNascimento')}
-          maxDate={new Date()}
-        />
-
-        <Select
-          label="Gênero"
-          placeholder="Selecione"
-          data={[
-            { value: 'masculino', label: 'Masculino' },
-            { value: 'feminino', label: 'Feminino' },
-            { value: 'outro', label: 'Outro' },
-            { value: 'prefiro-nao-informar', label: 'Prefiro não informar' },
-          ]}
-          {...form.getInputProps('genero')}
-        />
-
-        <Title order={5} mt="lg">Documento</Title>
-        <Radio.Group
-          label="Tipo de documento"
-          description="Escolha apenas um tipo de documento"
-          value={documentType}
-          onChange={(value) => setDocumentType(value as 'cpf' | 'cnpj')}
-          name="documentType"
-          withAsterisk
-        >
-          <Group mt="xs">
-            <Radio value="cpf" label="CPF (Pessoa Física)" />
-            <Radio value="cnpj" label="CNPJ (Pessoa Jurídica)" />
-          </Group>
-        </Radio.Group>
-
-        {documentType === 'cpf' ? (
-          <TextInput
-            label="CPF"
-            placeholder="000.000.000-00"
-            {...form.getInputProps('cpf')}
-            onChange={(e) => {
-              const formatted = formatCPF(e.target.value);
-              form.setFieldValue('cpf', formatted);
-            }}
-            required
-          />
-        ) : (
-          <TextInput
-            label="CNPJ"
-            placeholder="00.000.000/0000-00"
-            {...form.getInputProps('cnpj')}
-            onChange={(e) => {
-              const formatted = formatCNPJ(e.target.value);
-              form.setFieldValue('cnpj', formatted);
-            }}
-            required
-          />
-        )}
-
-        <Title order={5} mt="lg">Endereço</Title>
         <Group grow>
-          <TextInput
-            label="Endereço"
-            placeholder="Rua, Avenida, etc"
-            {...form.getInputProps('endereco')}
+          <PasswordInput
+            label="Senha"
+            placeholder="Sua senha"
+            {...form.getInputProps('password')}
             required
           />
-          <NumberInput
-            label="Número"
-            placeholder="Nº"
-            {...form.getInputProps('numero')}
-            required
-          />
-        </Group>
-
-        <Group grow>
-          <TextInput
-            label="Bairro"
-            placeholder="Seu bairro"
-            {...form.getInputProps('bairro')}
-            required
-          />
-          <TextInput
-            label="Cidade"
-            placeholder="Sua cidade"
-            {...form.getInputProps('cidade')}
+          <PasswordInput
+            label="Confirmar Senha"
+            placeholder="Confirme sua senha"
+            {...form.getInputProps('confirmPassword')}
             required
           />
         </Group>
 
         <Group grow>
           <Select
-            label="Estado"
-            placeholder="Selecione seu estado"
-            data={ESTADOS_BRASIL}
-            searchable
-            {...form.getInputProps('estado')}
+            label="Tipo de Documento"
+            data={[
+              { value: 'cpf', label: 'CPF' },
+              { value: 'cnpj', label: 'CNPJ' },
+            ]}
+            defaultValue={form.values.documentType}
+            onChange={handleDocumentTypeChange}
             required
           />
           <TextInput
-            label="CEP"
-            placeholder="00000-000"
-            {...form.getInputProps('cep')}
-            onChange={(e) => {
-              const formatted = formatCEP(e.target.value);
-              form.setFieldValue('cep', formatted);
-            }}
+            label={form.values.documentType === 'cpf' ? 'CPF' : 'CNPJ'}
+            placeholder={form.values.documentType === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'}
+            value={form.values.documentNumber}
+            onChange={handleDocumentChange}
+            error={form.errors.documentNumber}
+            required
+          />
+        </Group>
+
+        <Group grow>
+          <DateInput
+            label="Data de Nascimento"
+            placeholder="Selecione sua data de nascimento"
+            {...form.getInputProps('birthDate')}
+            maxDate={new Date()}
+            required
+          />
+          <TextInput
+            label="Telefone"
+            placeholder="(00) 00000-0000"
+            value={form.values.phone}
+            onChange={handlePhoneChange}
+            error={form.errors.phone}
             required
           />
         </Group>
 
         <Select
-          label="País"
-          placeholder="Selecione seu país"
-          data={PAISES}
-          searchable
-          {...form.getInputProps('pais')}
+          label="Gênero"
+          placeholder="Selecione seu gênero"
+          data={[
+            { value: 'male', label: 'Masculino' },
+            { value: 'female', label: 'Feminino' },
+            { value: 'other', label: 'Outro' },
+            { value: 'prefer_not_to_say', label: 'Prefiro não dizer' },
+          ]}
+          {...form.getInputProps('gender')}
           required
         />
 
-        <Group justify="flex-end" mt="md">
-          <Button type="submit">Próximo</Button>
-        </Group>
+        <Title order={2} mt="md">Endereço</Title>
+        {/* AddressForm com memoização para evitar re-renders desnecessários */}
+        {React.useMemo(() => (
+          <AddressForm
+            initialValues={form.values.address}
+            onChange={handleAddressChange}
+          />
+        ), [handleAddressChange, form.values.address])}
+
+        <Button type="submit" loading={loading} mt="xl">
+          Continuar
+        </Button>
       </Stack>
     </form>
   );
-} 
+}

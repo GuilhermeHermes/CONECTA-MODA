@@ -1,220 +1,154 @@
 'use client';
 
-import { useState } from 'react';
-import { Stack, Title, Text, Button, Group, Tabs, Loader, Alert } from '@mantine/core';
+import { Stack, Button, Group, TextInput, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
-import { RegistrationForm } from '../auth/RegistrationForm';
-import { ProfessionalForm } from '../auth/ProfessionalForm';
-import { useUser } from '@/contexts/UserContext';
-import { useAuth } from '@/contexts/AuthContext';
 
-interface RegistrationFormData {
-  nome: string;
-  email: string;
-  telefone: string;
-  cpf: string;
-  cnpj: string;
-  documentType: 'cpf' | 'cnpj';
-  dataNascimento: Date | null;
-  genero: string;
-  endereco: string;
-  numero: string;
-  bairro: string;
-  cidade: string;
-  pais: string;
-  estado: string;
-  password: string;
-  confirmPassword: string;
-  role?: 'profissional' | 'marca' | 'fornecedor';
-  cep: string;
-}
-
-interface ProfessionalFormData {
-  professionalName: string;
-  emailProfissional: string;
-  telefoneProfissional: string;
-  miniBio: string;
-  localizacaoProfissional: string;
-  website: string;
-  instagram: string;
-  facebook: string;
-  linkedin: string;
-  segmentos: string[];
-  habilidades: string[];
-  produtos: string[];
-  possuiLojaTisica: boolean;
-  possuiEcommerce: boolean;
-  profileImage?: File | null;
-  profileImageUrl?: string | null;
-}
-
-export function EditProfileForm() {
-  const { user, loading, error, updateUser } = useUser();
-  const { isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState<string | null>('personal');
-  const [saving, setSaving] = useState(false);
-
-  if (!isAuthenticated) {
-    return (
-      <Alert color="red" title="Acesso Negado">
-        Você precisa estar logado para acessar esta página.
-      </Alert>
-    );
-  }
-
-  if (loading) {
-    return (
-      <Stack align="center" justify="center" h={400}>
-        <Loader size="lg" />
-        <Text>Carregando informações do usuário...</Text>
-      </Stack>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert color="red" title="Erro">
-        {error}
-      </Alert>
-    );
-  }
-
-  if (!user) {
-    return (
-      <Alert color="yellow" title="Aviso">
-        Nenhuma informação do usuário encontrada.
-      </Alert>
-    );
-  }
-
-  const handlePersonalInfoSubmit = async (values: Partial<RegistrationFormData>) => {
-    try {
-      setSaving(true);
-      await updateUser({
-        nome: values.nome,
-        email: values.email,
-        telefone: values.telefone,
-        genero: values.genero,
-        dataNascimento: values.dataNascimento,
-      });
-
-      notifications.show({
-        title: 'Sucesso',
-        message: 'Informações pessoais atualizadas com sucesso!',
-        color: 'green',
-      });
-    } catch (error) {
-      notifications.show({
-        title: 'Erro',
-        message: 'Erro ao atualizar informações pessoais. Tente novamente.',
-        color: 'red',
-      });
-    } finally {
-      setSaving(false);
-    }
+interface EditProfileFormProps {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    professionalName: string;
+    miniBio: string;
+    profilePicture: string | null;
+    roles: string[];
+    professionalLocation: string;
+    professionalPhone: string;
+    professionalEmail: string;
+    website: string | null;
+    instagram: string | null;
+    facebook: string | null;
+    linkedin: string | null;
+    skills: string[];
+    products: string[];
+    segments: string[];
+    address?: {
+      neighborhood: string;
+      zipCode: string;
+      street: string;
+      number: string;
+      complement: string | null;
+      city: string;
+      state: string;
+      country: string;
+    };
   };
+  onSubmit: (values: any) => void;
+  onCancel: () => void;
+}
 
-  const handleProfessionalInfoSubmit = async (values: Partial<ProfessionalFormData>) => {
-    try {
-      setSaving(true);
-      await updateUser({
-        professionalName: values.professionalName,
-        emailProfissional: values.emailProfissional,
-        telefoneProfissional: values.telefoneProfissional,
-        miniBio: values.miniBio,
-        localizacaoProfissional: values.localizacaoProfissional,
-        website: values.website,
-        instagram: values.instagram,
-        facebook: values.facebook,
-        linkedin: values.linkedin,
-        segmentos: values.segmentos,
-        habilidades: values.habilidades,
-        produtos: values.produtos,
-        possuiLojaTisica: values.possuiLojaTisica,
-        possuiEcommerce: values.possuiEcommerce,
-      });
+export function EditProfileForm({ user, onSubmit, onCancel }: EditProfileFormProps) {
+  const form = useForm({
+    initialValues: {
+      name: user.name,
+      professionalName: user.professionalName,
+      miniBio: user.miniBio,
+      profilePicture: user.profilePicture,
+      professionalLocation: user.professionalLocation,
+      professionalPhone: user.professionalPhone,
+      professionalEmail: user.professionalEmail,
+      website: user.website || '',
+      instagram: user.instagram || '',
+      facebook: user.facebook || '',
+      linkedin: user.linkedin || '',
+      skills: user.skills,
+      products: user.products,
+      segments: user.segments,
+      address: user.address
+    },
+    validate: {
+      name: (value) => (!value ? 'Nome é obrigatório' : null),
+      professionalName: (value) => (!value ? 'Nome profissional é obrigatório' : null),
+      miniBio: (value) => (!value ? 'Mini bio é obrigatória' : null),
+      professionalLocation: (value) => (!value ? 'Localização profissional é obrigatória' : null),
+      professionalPhone: (value) => (!value ? 'Telefone profissional é obrigatório' : null),
+      professionalEmail: (value) => (!value ? 'Email profissional é obrigatório' : null),
+      website: (value) => (!value ? null : /^https?:\/\/.+/.test(value) ? null : 'URL inválida'),
+      instagram: (value) => (!value ? null : /^@?[a-zA-Z0-9._]{1,30}$/.test(value) ? null : 'Nome de usuário do Instagram inválido'),
+      facebook: (value) => (!value ? null : /^[a-zA-Z0-9.]{5,50}$/.test(value) ? null : 'Nome de usuário do Facebook inválido'),
+      linkedin: (value) => (!value ? null : /^[a-zA-Z0-9-]{5,100}$/.test(value) ? null : 'Nome de usuário do LinkedIn inválido'),
+    },
+  });
 
-      notifications.show({
-        title: 'Sucesso',
-        message: 'Informações profissionais atualizadas com sucesso!',
-        color: 'green',
-      });
-    } catch (error) {
-      notifications.show({
-        title: 'Erro',
-        message: 'Erro ao atualizar informações profissionais. Tente novamente.',
-        color: 'red',
-      });
-    } finally {
-      setSaving(false);
-    }
+  const handleSubmit = (values: any) => {
+    onSubmit({
+      ...values,
+      id: user.id,
+    });
   };
 
   return (
-    <Stack>
-      <Title order={2}>Editar Perfil</Title>
-      <Text c="dimmed">Atualize suas informações pessoais e profissionais</Text>
+    <form onSubmit={form.onSubmit(handleSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label="Nome Completo"
+          placeholder="Seu nome completo"
+          {...form.getInputProps('name')}
+        />
 
-      <Tabs value={activeTab} onChange={setActiveTab}>
-        <Tabs.List>
-          <Tabs.Tab value="personal">Informações Pessoais</Tabs.Tab>
-          <Tabs.Tab value="professional">Informações Profissionais</Tabs.Tab>
-        </Tabs.List>
+        <TextInput
+          label="Nome Profissional"
+          placeholder="Seu nome profissional"
+          {...form.getInputProps('professionalName')}
+        />
 
-        <Tabs.Panel value="personal" pt="xl">
-          <RegistrationForm
-            onSubmit={handlePersonalInfoSubmit}
-            initialValues={{
-              nome: user.nome,
-              email: user.email,
-              telefone: user.telefone,
-              genero: user.genero,
-              dataNascimento: user.dataNascimento ? new Date(user.dataNascimento) : null,
-              cpf: user.cpf,
-              cnpj: user.cnpj,
-              documentType: user.cpf ? 'cpf' : 'cnpj',
-              endereco: user.endereco,
-              numero: user.numero,
-              bairro: user.bairro,
-              cidade: user.cidade,
-              estado: user.estado,
-              pais: user.pais,
-              cep: user.cep,
-            }}
-          />
-        </Tabs.Panel>
+        <Textarea
+          label="Mini Bio"
+          placeholder="Uma breve descrição sobre você"
+          {...form.getInputProps('miniBio')}
+        />
 
-        <Tabs.Panel value="professional" pt="xl">
-          <ProfessionalForm
-            onSubmit={handleProfessionalInfoSubmit}
-            initialValues={{
-              professionalName: user.professionalName,
-              emailProfissional: user.emailProfissional,
-              telefoneProfissional: user.telefoneProfissional,
-              miniBio: user.miniBio,
-              localizacaoProfissional: user.localizacaoProfissional,
-              website: user.website,
-              instagram: user.instagram,
-              facebook: user.facebook,
-              linkedin: user.linkedin,
-              segmentos: user.segmentos,
-              habilidades: user.habilidades,
-              produtos: user.produtos,
-              possuiLojaTisica: user.possuiLojaTisica,
-              possuiEcommerce: user.possuiEcommerce,
-              profileImageUrl: user.profileImageUrl,
-            }}
-          />
-        </Tabs.Panel>
-      </Tabs>
+        <TextInput
+          label="Localização Profissional"
+          placeholder="Sua localização profissional"
+          {...form.getInputProps('professionalLocation')}
+        />
 
-      {saving && (
-        <Group justify="center" mt="md">
-          <Loader size="sm" />
-          <Text size="sm">Salvando alterações...</Text>
+        <TextInput
+          label="Telefone Profissional"
+          placeholder="Seu telefone profissional"
+          {...form.getInputProps('professionalPhone')}
+        />
+
+        <TextInput
+          label="Email Profissional"
+          placeholder="Seu email profissional"
+          {...form.getInputProps('professionalEmail')}
+        />
+
+        <TextInput
+          label="Website"
+          placeholder="https://seu-site.com"
+          {...form.getInputProps('website')}
+        />
+
+        <TextInput
+          label="Instagram"
+          placeholder="@seu_usuario"
+          {...form.getInputProps('instagram')}
+        />
+
+        <TextInput
+          label="Facebook"
+          placeholder="seu.usuario"
+          {...form.getInputProps('facebook')}
+        />
+
+        <TextInput
+          label="LinkedIn"
+          placeholder="seu-usuario"
+          {...form.getInputProps('linkedin')}
+        />
+
+        <Group justify="flex-end" mt="md">
+          <Button variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button type="submit">
+            Salvar
+          </Button>
         </Group>
-      )}
-    </Stack>
+      </Stack>
+    </form>
   );
 } 

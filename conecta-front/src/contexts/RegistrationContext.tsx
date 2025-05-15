@@ -1,123 +1,135 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-interface SocialLinks {
-  website?: string;
-  instagram?: string;
-  facebook?: string;
-  linkedin?: string;
-  twitter?: string;
-  [key: string]: string | undefined;
+interface Address {
+  cep: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  complement?: string;
 }
 
-interface RegistrationData {
-  // Step 1 - Role selection
-  role?: 'profissional' | 'marca' | 'fornecedor';
-  
-  // Step 2 - Personal info
-  nome?: string;
+export interface RegistrationData {
+  name?: string;
   email?: string;
-  telefone?: string;
-  cpf?: string;
-  cnpj?: string;
-  documentType?: 'cpf' | 'cnpj';
-  dataNascimento?: Date | null;
-  genero?: string;
-  endereco?: string;
-  numero?: string;
-  bairro?: string;
-  cidade?: string;
-  pais?: string;
-  estado?: string;
   password?: string;
   confirmPassword?: string;
-  
-  // Step 3 - Professional info
+  documentType?: 'cpf' | 'cnpj';
+  documentNumber?: string;
+  birthDate?: Date | null;
+  phone?: string;
+  role?: string;
+  address?: Address;
   professionalName?: string;
-  emailProfissional?: string;
-  telefoneProfissional?: string;
+  professionalEmail?: string;
+  professionalPhone?: string;
   miniBio?: string;
-  localizacaoProfissional?: string;
-  socialLinks?: SocialLinks;
-  segmentos?: string[];
-  habilidades?: string[];
-  produtos?: string[];
-  possuiLojaTisica?: boolean;
-  possuiEcommerce?: boolean;
+  professionalLocation?: string;
   website?: string;
   instagram?: string;
   facebook?: string;
   linkedin?: string;
+  segments?: string[];
+  skills?: string[];
+  products?: string[];
+  hasPhysicalStore?: boolean;
+  hasEcommerce?: boolean;
+  profileImageUrl?: string | null;
 }
 
 interface RegistrationContextType {
   registrationData: RegistrationData;
-  currentStep: number;
-  setCurrentStep: (step: number) => void;
   updateRegistrationData: (data: Partial<RegistrationData>) => void;
   clearRegistrationData: () => void;
 }
 
+const STORAGE_KEY = 'registration_data';
+
+const initialData: RegistrationData = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  documentType: 'cpf',
+  documentNumber: '',
+  birthDate: null,
+  phone: '',
+  address: {
+    cep: '',
+    street: '',
+    number: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+    complement: '',
+  },
+};
+
 const RegistrationContext = createContext<RegistrationContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'conecta_moda_registration';
-
 export function RegistrationProvider({ children }: { children: ReactNode }) {
-  const [registrationData, setRegistrationData] = useState<RegistrationData>({});
-  const [currentStep, setCurrentStep] = useState<number>(0);
-  const router = useRouter();
-
-  // Load registration data from localStorage on mount
-  useEffect(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        setRegistrationData(parsedData);
-        
-        // Navigate to appropriate step based on saved data
-        if (router) {
-          if (!parsedData.role) {
-            setCurrentStep(0);
-            router.push('/cadastro/chooseRole');
-          } else if (!parsedData.nome || !parsedData.email) {
-            setCurrentStep(1);
-            router.push('/cadastro/aboutYou');
-          } else if (!parsedData.professionalName) {
-            setCurrentStep(2);
-            router.push('/cadastro/businessInfos');
+  // Inicializa o estado com dados do localStorage ou dados iniciais
+  const [registrationData, setRegistrationData] = useState<RegistrationData>(() => {
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          // Converte a string de data de volta para objeto Date
+          if (parsedData.birthDate) {
+            parsedData.birthDate = new Date(parsedData.birthDate);
           }
+          return parsedData;
+        } catch (error) {
+          console.error('Erro ao carregar dados do localStorage:', error);
+          return initialData;
         }
-      } catch (error) {
-        console.error('Error parsing saved registration data:', error);
-        localStorage.removeItem(STORAGE_KEY);
       }
     }
-  }, [router]);
+    return initialData;
+  });
+
+  // Salva no localStorage sempre que os dados mudarem
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(registrationData));
+    }
+  }, [registrationData]);
 
   const updateRegistrationData = (data: Partial<RegistrationData>) => {
-    const updatedData = { ...registrationData, ...data };
-    setRegistrationData(updatedData);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedData));
+    setRegistrationData((prev) => {
+      const newData = { ...prev, ...data };
+      
+      // Ensure role is not 'user' if it's being set
+      if (data.role === 'user') {
+        delete newData.role;
+      }
+      
+      // Ensure address is properly structured
+      if (data.address) {
+        newData.address = {
+          ...prev.address,
+          ...data.address
+        };
+      }
+      
+      return newData;
+    });
   };
 
   const clearRegistrationData = () => {
-    setRegistrationData({});
-    setCurrentStep(0);
-    localStorage.removeItem(STORAGE_KEY);
+    setRegistrationData(initialData);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY);
+    }
   };
 
   return (
     <RegistrationContext.Provider
-      value={{
-        registrationData,
-        currentStep,
-        setCurrentStep,
-        updateRegistrationData,
-        clearRegistrationData,
-      }}
+      value={{ registrationData, updateRegistrationData, clearRegistrationData }}
     >
       {children}
     </RegistrationContext.Provider>

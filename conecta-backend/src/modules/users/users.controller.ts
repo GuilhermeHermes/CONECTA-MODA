@@ -1,21 +1,24 @@
 import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
+import { CreateUserDto } from './dto/create-user.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService
   ) {}
 
   private processUserUrls(user: User): User {
     const backendUrl = this.configService.get('BACKEND_URL') || 'http://localhost:3001';
     
-    if (user.profileImageUrl && !user.profileImageUrl.startsWith('http')) {
-      user.profileImageUrl = `${backendUrl}${user.profileImageUrl}`;
+    if (user.profilePicture && !user.profilePicture.startsWith('http')) {
+      user.profilePicture = `${backendUrl}${user.profilePicture}`;
     }
     
     return user;
@@ -23,6 +26,21 @@ export class UsersController {
 
   private processUsersUrls(users: User[]): User[] {
     return users.map(user => this.processUserUrls(user));
+  }
+
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto) {
+    const user = await this.usersService.create(createUserDto);
+    const processedUser = this.processUserUrls(user);
+    
+    // Generate token
+    const payload = { email: user.email, sub: user.id, roles: user.roles };
+    const access_token = this.jwtService.sign(payload);
+    
+    return {
+      user: processedUser,
+      access_token
+    };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -35,21 +53,21 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('professionals')
   async findProfessionals(): Promise<User[]> {
-    const users = await this.usersService.findByRole('professional');
+    const users = await this.usersService.findByRole(UserRole.PROFESSIONAL);
     return this.processUsersUrls(users);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('suppliers')
   async findSuppliers(): Promise<User[]> {
-    const users = await this.usersService.findByRole('supplier');
+    const users = await this.usersService.findByRole(UserRole.SUPPLIER);
     return this.processUsersUrls(users);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('enterprises')
-  async findEnterprises(): Promise<User[]> {
-    const users = await this.usersService.findByRole('enterprise');
+  @Get('brands')
+  async findBrands(): Promise<User[]> {
+    const users = await this.usersService.findByRole(UserRole.BRAND);
     return this.processUsersUrls(users);
   }
 

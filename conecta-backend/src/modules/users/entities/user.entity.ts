@@ -1,120 +1,120 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Address } from './address.entity';
+import { Account } from './account.entity';
+
+export enum UserRole {
+  DEFAULT = 'DEFAULT',
+  PROFESSIONAL = 'PROFESSIONAL',
+  SUPPLIER = 'SUPPLIER',
+  BRAND = 'BRAND',
+}
 
 export enum DocumentType {
   CPF = 'cpf',
   CNPJ = 'cnpj',
 }
 
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+  OTHER = 'other',
+  PREFER_NOT_TO_SAY = 'prefer_not_to_say',
+}
+
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   id: string;
-
-  @Column({ nullable: true })
-  nome: string;
 
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true, select: false })
+  @Column()
   password: string;
 
-  @Column({ nullable: true })
-  telefone: string;
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    array: true,
+    default: [UserRole.DEFAULT],
+  })
+  roles: UserRole[];
 
   @Column({ nullable: true })
-  cpf: string;
+  name?: string;
 
-  @Column({ nullable: true })
-  cnpj: string;
-  
   @Column({ type: 'enum', enum: DocumentType, nullable: true })
-  documentType: DocumentType;
-
-  @Column({ nullable: true, type: 'date' })
-  dataNascimento: Date;
+  documentType?: DocumentType;
 
   @Column({ nullable: true })
-  genero: string;
+  documentNumber?: string;
+
+  @Column({ type: 'enum', enum: Gender, nullable: true })
+  gender?: Gender;
+
+  @Column({ type: 'date', nullable: true })
+  birthDate?: Date;
+
+  @Column('text', { array: true, default: [] })
+  specialties: string[];
 
   @Column({ nullable: true })
-  endereco: string;
+  miniBio?: string;
+
+  @Column()
+  phone: string;
 
   @Column({ nullable: true })
-  numero: string;
+  hasPhysicalStore?: boolean;
 
   @Column({ nullable: true })
-  bairro: string;
+  hasEcommerce?: boolean;
 
   @Column({ nullable: true })
-  cidade: string;
-
-  @Column({ nullable: true })
-  pais: string;
-
-  @Column({ nullable: true })
-  estado: string;
-  
-  @Column({ nullable: true })
-  cep: string;
-
-  @Column({ default: 'local' })
-  provider: string;
-
-  @Column({ nullable: true })
-  providerId: string;
-
-  @Column({ type: 'simple-array', default: 'user' })
-  roles: string[];
-  
-  @Column({ nullable: true })
-  professionalName: string;
-
-  @Column({ nullable: true })
-  emailProfissional: string;
-
-  @Column({ nullable: true })
-  telefoneProfissional: string;
-
-  @Column({ nullable: true })
-  miniBio: string;
-
-  @Column({ nullable: true })
-  localizacaoProfissional: string;
-  
-  @Column({ type: 'simple-array', nullable: true })
-  segmentos: string[];
-  
-  @Column({ type: 'simple-array', nullable: true })
-  habilidades: string[];
-  
-  @Column({ type: 'simple-array', nullable: true })
-  produtos: string[];
-  
-  @Column({ nullable: true })
-  website: string;
-  
-  @Column({ nullable: true })
-  instagram: string;
-  
-  @Column({ nullable: true })
-  facebook: string;
-  
-  @Column({ nullable: true })
-  linkedin: string;
-  
-  @Column({ nullable: true })
-  possuiLojaTisica: boolean;
-  
-  @Column({ nullable: true })
-  possuiEcommerce: boolean;
-
-  @Column({ nullable: true, type: 'text' })
-  profileImageUrl: string;
+  profilePicture?: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  website?: string;
+
+  @Column({ nullable: true })
+  instagram?: string;
+
+  @Column({ nullable: true })
+  facebook?: string;
+
+  @Column({ nullable: true })
+  linkedin?: string;
+
+  @Column({ nullable: true })
+  professionalName?: string;
+
+  @Column({ nullable: true })
+  professionalEmail?: string;
+
+  @Column({ nullable: true })
+  professionalPhone?: string;
+
+  @Column({ nullable: true })
+  professionalLocation?: string;
+
+  @Column('text', { array: true, default: [] })
+  segments: string[];
+
+  @Column('text', { array: true, default: [] })
+  skills: string[];
+
+  @Column('text', { array: true, default: [] })
+  products: string[];
+
+  @OneToOne(() => Address, address => address.user)
+  address?: Address;
+
+  @OneToMany(() => Account, account => account.user)
+  accounts: Account[];
 } 

@@ -6,20 +6,28 @@ import { Container, Title, Text, Button, Group, Paper, Card, Avatar, SimpleGrid,
 import axios from 'axios';
 import { useAuth } from '@/contexts/AuthContext';
 import { config } from '@/config';
-import { IconSearch, IconFilter } from '@tabler/icons-react';
+import { IconSearch, IconFilter, IconWorld, IconBrandInstagram, IconBrandFacebook, IconBrandLinkedin } from '@tabler/icons-react';
 import { useDebouncedValue } from '@mantine/hooks';
+import { useUser } from '@/contexts/UserContext';
 
 interface UserCard {
   id: string;
-  nome: string;
+  name: string;
   email: string;
   professionalName: string;
   miniBio: string;
   profileImageUrl: string;
   roles: string[];
-  localizacaoProfissional: string;
-  habilidades?: string[];
-  segmentos?: string[];
+  professionalLocation: string;
+  professionalPhone: string;
+  professionalEmail: string;
+  website: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  linkedin: string | null;
+  skills: string[];
+  products: string[];
+  segments: string[];
 }
 
 interface FilterState {
@@ -40,6 +48,25 @@ interface FilterBarProps {
   onSpecialtyChange: (value: string) => void;
   onRoleChange: (value: string | null) => void;
   onSearch: () => void;
+}
+
+interface Professional {
+  id: string;
+  name: string;
+  professionalName: string;
+  miniBio: string;
+  profilePicture: string | null;
+  roles: string[];
+  professionalLocation: string;
+  professionalPhone: string;
+  professionalEmail: string;
+  website: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  linkedin: string | null;
+  skills: string[];
+  products: string[];
+  segments: string[];
 }
 
 const FilterBar = memo(({ 
@@ -88,8 +115,8 @@ const FilterBar = memo(({
               onChange={onRoleChange}
               data={[
                 { value: 'all', label: 'Todos' },
-                { value: 'professional', label: 'Profissionais' },
-                { value: 'supplier', label: 'Fornecedores' }
+                { value: 'PROFESSIONAL', label: 'Profissionais' },
+                { value: 'SUPPLIER', label: 'Fornecedores' }
               ]}
             />
             <Button
@@ -114,13 +141,13 @@ FilterBar.displayName = 'FilterBar';
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading, token } = useAuth();
   const router = useRouter();
-  const [professionals, setProfessionals] = useState<UserCard[]>([]);
+  const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [suppliers, setSuppliers] = useState<UserCard[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [locationInput, setLocationInput] = useState('');
   const [specialtyInput, setSpecialtyInput] = useState('');
-  const [debouncedSearch] = useDebouncedValue(searchInput, 300);
+  const [debouncedSearch] = useDebouncedValue(searchQuery, 300);
   const [debouncedLocation] = useDebouncedValue(locationInput, 300);
   const [debouncedSpecialty] = useDebouncedValue(specialtyInput, 300);
   const [filters, setFilters] = useState<FilterState>({
@@ -142,7 +169,7 @@ export default function DashboardPage() {
     
     setLoading(true);
     try {
-      if (user?.roles?.includes('enterprise')) {
+      if (user?.roles?.includes('BRAND')) {
         // Buscar profissionais
         const professionalRes = await axios.get(`${config.api.baseURL}/users/professionals`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -186,7 +213,7 @@ export default function DashboardPage() {
   }, []);
 
   const handleSearchChange = useCallback((value: string) => {
-    setSearchInput(value);
+    setSearchQuery(value);
   }, []);
 
   const handleLocationChange = useCallback((value: string) => {
@@ -197,27 +224,24 @@ export default function DashboardPage() {
     setSpecialtyInput(value);
   }, []);
 
-  const filterUsers = useCallback((users: UserCard[]) => {
+  const filterUsers = useCallback((users: Professional[]) => {
     return users.filter(user => {
       const matchesSearch = 
         !filters.search ||
         user.professionalName?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        user.nome.toLowerCase().includes(filters.search.toLowerCase()) ||
         user.miniBio?.toLowerCase().includes(filters.search.toLowerCase());
       
       const matchesLocation = 
         !filters.location || 
-        user.localizacaoProfissional?.toLowerCase().includes(filters.location.toLowerCase());
+        user.professionalLocation?.toLowerCase().includes(filters.location.toLowerCase());
       
       const matchesRole = 
         filters.role === 'all' ||
-        (filters.role === 'professional' && user.roles.includes('professional')) ||
-        (filters.role === 'supplier' && user.roles.includes('supplier'));
+        (filters.role === 'PROFESSIONAL' && user.roles.includes('PROFESSIONAL'));
 
       const matchesSpecialty = 
         !filters.specialty ||
-        user.habilidades?.some(h => h.toLowerCase().includes(filters.specialty.toLowerCase())) ||
-        user.segmentos?.some(s => s.toLowerCase().includes(filters.specialty.toLowerCase()));
+        user.skills?.some(h => h.toLowerCase().includes(filters.specialty.toLowerCase()));
 
       return matchesSearch && matchesLocation && matchesRole && matchesSpecialty;
     });
@@ -231,19 +255,19 @@ export default function DashboardPage() {
     );
   }
 
-  const isEnterprise = user?.roles?.includes('enterprise');
-  const isSupplier = user?.roles?.includes('supplier');
-  const isProfessional = user?.roles?.includes('professional');
+  const isBrand = user?.roles?.includes('BRAND');
+  const isSupplier = user?.roles?.includes('SUPPLIER');
+  const isProfessional = user?.roles?.includes('PROFESSIONAL');
 
   const renderUserContent = () => {
-    if (isEnterprise) {
+    if (isBrand) {
       const filteredProfessionals = filterUsers(professionals);
-      const filteredSuppliers = filterUsers(suppliers);
+      const filteredSuppliers = filterUsers(professionals);
 
       return (
         <>
           <FilterBar 
-            searchInput={searchInput}
+            searchInput={searchQuery}
             locationInput={locationInput}
             specialtyInput={specialtyInput}
             role={filters.role}
@@ -258,37 +282,81 @@ export default function DashboardPage() {
           {filteredProfessionals.length > 0 ? (
             <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
               {filteredProfessionals.map((prof) => (
-                <Card key={prof.id} shadow="sm" padding="lg" radius="md" withBorder>
-                  <Card.Section>
-                    <Group px="md" pt="md">
-                      <Avatar 
-                        src={prof.profileImageUrl} 
-                        size="lg" 
-                        radius="xl"
-                      />
-                      <div>
-                        <Text fw={500} size="lg">{prof.professionalName || prof.nome}</Text>
-                        <Badge color="blue">Profissional</Badge>
-                      </div>
-                    </Group>
-                  </Card.Section>
-                  <Text c="dimmed" size="sm" mt="md" lineClamp={3}>
-                    {prof.miniBio || "Sem descrição"}
-                  </Text>
-                  <Text c="dimmed" size="xs" mt="xs">
-                    {prof.localizacaoProfissional || "Localização não informada"}
-                  </Text>
-                  <Button 
-                    variant="light" 
-                    color="blue" 
-                    fullWidth 
-                    mt="md" 
-                    radius="md"
-                    onClick={() => router.push(`/profile/${prof.id}`)}
-                  >
-                    Ver perfil
-                  </Button>
-                </Card>
+                <Paper key={prof.id} p="md" radius="md" withBorder>
+                  <Group>
+                    <Avatar src={prof.profilePicture} size={60} radius="md" />
+                    <div style={{ flex: 1 }}>
+                      <Text fw={500} size="lg">
+                        {prof.professionalName}
+                      </Text>
+                      <Text size="sm" c="dimmed" lineClamp={2}>
+                        {prof.miniBio}
+                      </Text>
+                    </div>
+                  </Group>
+
+                  <Group mt="md" gap="xs">
+                    {prof.skills.map((skill, index) => (
+                      <Badge key={`${skill}-${index}`} size="sm">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </Group>
+
+                  <Group mt="md" gap="xs">
+                    {prof.website && (
+                      <Button
+                        component="a"
+                        href={prof.website}
+                        target="_blank"
+                        leftSection={<IconWorld size={16} />}
+                        variant="subtle"
+                        size="xs"
+                      >
+                        Website
+                      </Button>
+                    )}
+                    {prof.instagram && (
+                      <Button
+                        component="a"
+                        href={`https://instagram.com/${prof.instagram.replace('@', '')}`}
+                        target="_blank"
+                        leftSection={<IconBrandInstagram size={16} />}
+                        variant="subtle"
+                        size="xs"
+                        color="pink"
+                      >
+                        Instagram
+                      </Button>
+                    )}
+                    {prof.facebook && (
+                      <Button
+                        component="a"
+                        href={`https://facebook.com/${prof.facebook}`}
+                        target="_blank"
+                        leftSection={<IconBrandFacebook size={16} />}
+                        variant="subtle"
+                        size="xs"
+                        color="blue"
+                      >
+                        Facebook
+                      </Button>
+                    )}
+                    {prof.linkedin && (
+                      <Button
+                        component="a"
+                        href={`https://linkedin.com/in/${prof.linkedin}`}
+                        target="_blank"
+                        leftSection={<IconBrandLinkedin size={16} />}
+                        variant="subtle"
+                        size="xs"
+                        color="indigo"
+                      >
+                        LinkedIn
+                      </Button>
+                    )}
+                  </Group>
+                </Paper>
               ))}
             </SimpleGrid>
           ) : (
@@ -298,26 +366,26 @@ export default function DashboardPage() {
           <Title order={3} mt="xl" mb="md">Fornecedores</Title>
           {filteredSuppliers.length > 0 ? (
             <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-              {filteredSuppliers.map((supplier) => (
-                <Card key={supplier.id} shadow="sm" padding="lg" radius="md" withBorder>
+              {filteredSuppliers.map((SUPPLIER) => (
+                <Card key={SUPPLIER.id} shadow="sm" padding="lg" radius="md" withBorder>
                   <Card.Section>
                     <Group px="md" pt="md">
                       <Avatar 
-                        src={supplier.profileImageUrl} 
+                        src={SUPPLIER.profilePicture} 
                         size="lg" 
                         radius="xl"
                       />
                       <div>
-                        <Text fw={500} size="lg">{supplier.professionalName || supplier.nome}</Text>
+                        <Text fw={500} size="lg">{SUPPLIER.professionalName || SUPPLIER.name}</Text>
                         <Badge color="grape">Fornecedor</Badge>
                       </div>
                     </Group>
                   </Card.Section>
                   <Text c="dimmed" size="sm" mt="md" lineClamp={3}>
-                    {supplier.miniBio || "Sem descrição"}
+                    {SUPPLIER.miniBio || "Sem descrição"}
                   </Text>
                   <Text c="dimmed" size="xs" mt="xs">
-                    {supplier.localizacaoProfissional || "Localização não informada"}
+                    {SUPPLIER.professionalLocation || "Localização não informada"}
                   </Text>
                   <Button 
                     variant="light" 
@@ -325,7 +393,7 @@ export default function DashboardPage() {
                     fullWidth 
                     mt="md" 
                     radius="md"
-                    onClick={() => router.push(`/profile/${supplier.id}`)}
+                    onClick={() => router.push(`/profile/${SUPPLIER.id}`)}
                   >
                     Ver perfil
                   </Button>
@@ -367,10 +435,10 @@ export default function DashboardPage() {
       <Paper p="md" withBorder mb="xl">
         <Group justify="space-between">
           <div>
-            <Text fw={500} size="lg">Bem-vindo, {user?.nome || user?.email}</Text>
+            <Text fw={500} size="lg">Bem-vindo, {user?.name || user?.email}</Text>
             <Text c="dimmed" size="sm">
               Seu perfil: {
-                isEnterprise ? 'Marca/Empresa' : 
+                isBrand ? 'Marca/Empresa' : 
                 isSupplier ? 'Fornecedor' : 
                 isProfessional ? 'Profissional' : 
                 'Usuário'

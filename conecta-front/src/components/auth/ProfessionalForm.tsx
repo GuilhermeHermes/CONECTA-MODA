@@ -1,89 +1,86 @@
 'use client';
 
-import { TextInput, Button, Group, Stack, Textarea, MultiSelect, Switch, Title, Text } from '@mantine/core';
+import { Stack, Button, Group, TextInput, Textarea, MultiSelect, Switch, Title, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { notifications } from '@mantine/notifications';
-import { useState, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { ProfileImageUpload } from '@/components/ui/ProfileImageUpload';
-
-interface SocialLinks {
-  website?: string;
-  instagram?: string;
-  facebook?: string;
-  linkedin?: string;
-  [key: string]: string | undefined;
-}
-
-interface ProfessionalFormData {
-  professionalName: string;
-  emailProfissional: string;
-  telefoneProfissional: string;
-  miniBio: string;
-  localizacaoProfissional: string;
-  website: string;
-  instagram: string;
-  facebook: string;
-  linkedin: string;
-  segmentos: string[];
-  habilidades: string[];
-  produtos: string[];
-  possuiLojaTisica: boolean;
-  possuiEcommerce: boolean;
-  profileImage?: File | null;
-  profileImageUrl?: string | null;
-}
-
-interface ProfessionalFormProps {
-  onSubmit: (values: ProfessionalFormData) => void;
-  initialValues?: Partial<ProfessionalFormData>;
-}
+import { useState } from 'react';
 
 const SEGMENTOS_DATA = [
   { value: 'feminino', label: 'Feminino' },
   { value: 'masculino', label: 'Masculino' },
   { value: 'infantil', label: 'Infantil' },
-  { value: 'moda-praia', label: 'Moda Praia' },
+  { value: 'praia', label: 'Moda Praia' },
   { value: 'plus-size', label: 'Plus Size' },
-  { value: 'casual', label: 'Casual' },
-  { value: 'formal', label: 'Formal' },
-  { value: 'esportivo', label: 'Esportivo' },
-  { value: 'luxo', label: 'Luxo' },
-  { value: 'sustentavel', label: 'Sustentável' },
+  { value: 'outros', label: 'Outros' },
 ];
 
 const HABILIDADES_DATA = [
   { value: 'modelagem', label: 'Modelagem' },
   { value: 'costura', label: 'Costura' },
-  { value: 'estampagem', label: 'Estampagem' },
-  { value: 'bordado', label: 'Bordado' },
   { value: 'design', label: 'Design' },
-  { value: 'padronagem', label: 'Padronagem' },
-  { value: 'acessórios', label: 'Acessórios' },
-  { value: 'consultoria', label: 'Consultoria' },
-  { value: 'produção', label: 'Produção' },
-  { value: 'desenvolvimento', label: 'Desenvolvimento' },
+  { value: 'estilismo', label: 'Estilismo' },
+  { value: 'outros', label: 'Outros' },
 ];
 
 const PRODUTOS_DATA = [
   { value: 'tecidos', label: 'Tecidos' },
   { value: 'aviamentos', label: 'Aviamentos' },
-  { value: 'estampas', label: 'Estampas' },
+  { value: 'estamparia', label: 'Estamparia' },
   { value: 'embalagens', label: 'Embalagens' },
   { value: 'etiquetas', label: 'Etiquetas' },
-  { value: 'acessórios', label: 'Acessórios' },
-  { value: 'maquinas', label: 'Máquinas' },
-  { value: 'ferramentas', label: 'Ferramentas' },
-  { value: 'materiais', label: 'Materiais' },
   { value: 'outros', label: 'Outros' },
 ];
 
+interface ProfessionalFormProps {
+  onSubmit: (values: any) => void;
+  initialValues?: {
+    professionalName: string;
+    professionalEmail: string;
+    professionalPhone: string;
+    miniBio: string;
+    professionalLocation: string;
+    socialLinks?: {
+      website?: string;
+      instagram?: string;
+      facebook?: string;
+      linkedin?: string;
+    };
+    skills: string[];
+    products: string[];
+    segments: string[];
+    profilePicture: string | null;
+    hasPhysicalStore: boolean;
+    hasEcommerce: boolean;
+  };
+}
+
+interface FormValues {
+  professionalName: string;
+  professionalEmail: string;
+  professionalPhone: string;
+  miniBio: string;
+  professionalLocation: string;
+  socialLinks: {
+    website: string;
+    instagram: string;
+    facebook: string;
+    linkedin: string;
+  };
+  skills: string[];
+  products: string[];
+  segments: string[];
+  profilePicture: string | null;
+  hasPhysicalStore: boolean;
+  hasEcommerce: boolean;
+}
+
 export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormProps) {
   const { user } = useUser();
-  const [showEcommerce, setShowEcommerce] = useState(initialValues?.possuiEcommerce || false);
-  const [showLoja, setShowLoja] = useState(initialValues?.possuiLojaTisica || false);
+  const [showEcommerce, setShowEcommerce] = useState(initialValues?.hasEcommerce || false);
+  const [showLoja, setShowLoja] = useState(initialValues?.hasPhysicalStore || false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(initialValues?.profileImageUrl || null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(initialValues?.profilePicture || null);
   
   const role = user?.roles?.[0]?.toLowerCase() || '';
   
@@ -91,48 +88,46 @@ export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormPr
   let professionalNamePlaceholder = 'Digite seu nome profissional';
   let miniBioPlaceholder = 'Descreva suas principais características profissionais';
   
-  const form = useForm<ProfessionalFormData>({
+  const form = useForm<FormValues>({
     initialValues: {
-      professionalName: '',
-      emailProfissional: '',
-      telefoneProfissional: '',
-      miniBio: '',
-      localizacaoProfissional: '',
-      website: '',
-      instagram: '',
-      facebook: '',
-      linkedin: '',
-      segmentos: [],
-      habilidades: [],
-      produtos: [],
-      possuiLojaTisica: false,
-      possuiEcommerce: false,
-      profileImage,
-      profileImageUrl,
-      ...initialValues,
+      professionalName: initialValues?.professionalName || '',
+      professionalEmail: initialValues?.professionalEmail || '',
+      professionalPhone: initialValues?.professionalPhone || '',
+      miniBio: initialValues?.miniBio || '',
+      professionalLocation: initialValues?.professionalLocation || '',
+      socialLinks: {
+        website: initialValues?.socialLinks?.website || '',
+        instagram: initialValues?.socialLinks?.instagram || '',
+        facebook: initialValues?.socialLinks?.facebook || '',
+        linkedin: initialValues?.socialLinks?.linkedin || '',
+      },
+      skills: initialValues?.skills || [],
+      products: initialValues?.products || [],
+      segments: initialValues?.segments || [],
+      profilePicture: initialValues?.profilePicture || null,
+      hasPhysicalStore: initialValues?.hasPhysicalStore || false,
+      hasEcommerce: initialValues?.hasEcommerce || false,
     },
     validate: {
-      professionalName: (value) => (value.length < 3 ? 'Nome profissional deve ter pelo menos 3 caracteres' : null),
-      emailProfissional: (value) => (!value ? null : /^\S+@\S+$/.test(value) ? null : 'Email inválido'),
-      miniBio: (value) => (value.length < 10 ? 'Descrição muito curta. Mínimo de 10 caracteres.' : null),
-      website: (value) => (!value ? null : /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$/.test(value) ? null : 'URL inválida'),
-      instagram: (value) => (!value ? null : /^@?[a-zA-Z0-9._]{1,30}$/.test(value) ? null : 'Nome de usuário do Instagram inválido'),
-      facebook: (value) => (!value ? null : /^[a-zA-Z0-9.]{5,50}$/.test(value) ? null : 'Nome de usuário do Facebook inválido'),
-      linkedin: (value) => (!value ? null : /^[a-zA-Z0-9-]{5,100}$/.test(value) ? null : 'Nome de usuário do LinkedIn inválido'),
+      professionalName: (value: string) => (!value ? 'Nome profissional é obrigatório' : null),
+      professionalEmail: (value: string) => (!value ? 'Email profissional é obrigatório' : null),
+      professionalPhone: (value: string) => (!value ? 'Telefone profissional é obrigatório' : null),
+      miniBio: (value: string) => (!value ? 'Mini bio é obrigatória' : null),
+      socialLinks: {
+        website: (value: string) => (!value ? null : /^https?:\/\/.+/.test(value) ? null : 'URL inválida'),
+        instagram: (value: string) => (!value ? null : /^@?[a-zA-Z0-9._]{1,30}$/.test(value) ? null : 'Nome de usuário do Instagram inválido'),
+        facebook: (value: string) => (!value ? null : /^[a-zA-Z0-9.]{5,50}$/.test(value) ? null : 'Nome de usuário do Facebook inválido'),
+        linkedin: (value: string) => (!value ? null : /^[a-zA-Z0-9-]{5,100}$/.test(value) ? null : 'Nome de usuário do LinkedIn inválido'),
+      },
     },
   });
-  
-  useEffect(() => {
-    setShowEcommerce(form.values.possuiEcommerce);
-    setShowLoja(form.values.possuiLojaTisica);
-  }, [form.values.possuiEcommerce, form.values.possuiLojaTisica]);
 
   // Ajustar labels e placeholders baseado no tipo de usuário
-  if (role === 'fornecedor') {
+  if (role === 'SUPPLIER') {
     professionalNameLabel = 'Nome da Empresa';
     professionalNamePlaceholder = 'Nome da empresa que representa';
     miniBioPlaceholder = 'Descreva os produtos que oferece: tecidos, aviamentos, estamparia, embalagens, etiquetas, etc.';
-  } else if (role === 'profissional') {
+  } else if (role === 'PROFESSIONAL') {
     professionalNameLabel = 'Nome Profissional';
     professionalNamePlaceholder = 'Seu nome profissional ou do ateliê';
     miniBioPlaceholder = 'Descreva suas principais habilidades e especialidades';
@@ -150,59 +145,52 @@ export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormPr
     return value;
   };
 
-  const handleImageChange = (file: File | null, imageUrl: string | null) => {
+  const handleImageChange = (file: File | null) => {
     setProfileImage(file);
-    setProfileImageUrl(imageUrl);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setProfileImageUrl(null);
+    }
   };
 
-  const handleSubmit = (values: ProfessionalFormData) => {
-    const socialLinks: SocialLinks = {};
+  const handleSubmit = (values: FormValues) => {
+    const { socialLinks, ...rest } = values;
     
-    if (values.website) socialLinks.website = values.website;
-    if (values.instagram) socialLinks.instagram = values.instagram;
-    if (values.facebook) socialLinks.facebook = values.facebook;
-    if (values.linkedin) socialLinks.linkedin = values.linkedin;
-    
-    const formattedValues = {
-      ...values,
-      socialLinks,
-      profileImage,
-      profileImageUrl
-    };
-    
-    try {
-      onSubmit(formattedValues as ProfessionalFormData);
-    } catch (error) {
-      notifications.show({
-        title: 'Erro ao enviar formulário',
-        message: 'Ocorreu um erro ao processar o formulário. Tente novamente.',
-        color: 'red',
-      });
-    }
+    onSubmit({
+      ...rest,
+      profilePicture: profileImageUrl,
+      hasPhysicalStore: showLoja,
+      hasEcommerce: showEcommerce,
+      website: socialLinks.website || null,
+      instagram: socialLinks.instagram || null,
+      facebook: socialLinks.facebook || null,
+      linkedin: socialLinks.linkedin || null,
+    });
   };
 
   // Função para renderizar o componente específico de dados por perfil
   const renderDataComponent = () => {
-    if (role === 'fornecedor') {
+    if (role === 'SUPPLIER') {
       return (
         <MultiSelect
-          label="Produtos Oferecidos"
-          placeholder="Selecione os produtos que você oferece"
+          label="Produtos"
+          placeholder="Selecione os produtos que oferece"
           data={PRODUTOS_DATA}
-          searchable
-          clearable
-          {...form.getInputProps('produtos')}
+          {...form.getInputProps('products')}
         />
       );
-    } else if (role === 'profissional') {
+    } else if (role === 'PROFESSIONAL') {
       return (
         <MultiSelect
           label="Habilidades"
-          placeholder="Selecione suas principais habilidades"
+          placeholder="Selecione suas habilidades"
           data={HABILIDADES_DATA}
-          searchable
-          clearable
-          {...form.getInputProps('habilidades')}
+          {...form.getInputProps('skills')}
         />
       );
     } else {
@@ -211,9 +199,7 @@ export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormPr
           label="Segmentos"
           placeholder="Selecione os segmentos que sua marca atua"
           data={SEGMENTOS_DATA}
-          searchable
-          clearable
-          {...form.getInputProps('segmentos')}
+          {...form.getInputProps('segments')}
         />
       );
     }
@@ -239,30 +225,31 @@ export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormPr
 
         <TextInput
           label="Email Profissional"
-          placeholder="email@profissional.com"
-          {...form.getInputProps('emailProfissional')}
+          placeholder="Seu email profissional"
+          {...form.getInputProps('professionalEmail')}
+          required
         />
 
         <TextInput
-          label="Telefone Profissional/Comercial"
-          placeholder="(00) 00000-0000"
-          {...form.getInputProps('telefoneProfissional')}
+          label="Telefone Profissional"
+          placeholder="Seu telefone profissional"
+          {...form.getInputProps('professionalPhone')}
           onChange={(e) => {
             const formatted = formatPhoneNumber(e.target.value);
-            form.setFieldValue('telefoneProfissional', formatted);
+            form.setFieldValue('professionalPhone', formatted);
           }}
+          required
         />
-        
+
         <TextInput
           label="Localização Profissional"
-          placeholder="Bairro, Cidade - Estado"
-          {...form.getInputProps('localizacaoProfissional')}
+          placeholder="Sua localização profissional"
+          {...form.getInputProps('professionalLocation')}
         />
         
         <Textarea
-          label="Mini Bio / Descrição"
+          label="Mini Bio"
           placeholder={miniBioPlaceholder}
-          minRows={4}
           {...form.getInputProps('miniBio')}
           required
         />
@@ -270,52 +257,48 @@ export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormPr
         {renderDataComponent()}
         
         <Title order={5} mt="sm">Redes Sociais</Title>
-        
+
         <TextInput
           label="Website"
-          placeholder="https://www.seusite.com.br"
-          {...form.getInputProps('website')}
+          placeholder="https://seu-site.com"
+          {...form.getInputProps('socialLinks.website', { type: 'input' })}
         />
-        
+
         <TextInput
           label="Instagram"
-          placeholder="@seuusuario"
-          {...form.getInputProps('instagram')}
+          placeholder="@seu_usuario"
+          {...form.getInputProps('socialLinks.instagram', { type: 'input' })}
         />
-        
+
         <TextInput
           label="Facebook"
-          placeholder="seuusuario"
-          {...form.getInputProps('facebook')}
+          placeholder="seu.usuario"
+          {...form.getInputProps('socialLinks.facebook', { type: 'input' })}
         />
-        
+
         <TextInput
           label="LinkedIn"
           placeholder="seu-usuario"
-          {...form.getInputProps('linkedin')}
+          {...form.getInputProps('socialLinks.linkedin', { type: 'input' })}
         />
-        
-        {role === 'marca' && (
-          <>
-            <Switch
-              label="Possui loja física"
-              checked={showLoja}
-              onChange={(event) => {
-                setShowLoja(event.currentTarget.checked);
-                form.setFieldValue('possuiLojaTisica', event.currentTarget.checked);
-              }}
-            />
-            
-            <Switch
-              label="Possui e-commerce"
-              checked={showEcommerce}
-              onChange={(event) => {
-                setShowEcommerce(event.currentTarget.checked);
-                form.setFieldValue('possuiEcommerce', event.currentTarget.checked);
-              }}
-            />
-          </>
-        )}
+
+        <Switch
+          label="Possui loja física"
+          checked={showLoja}
+          onChange={(event) => {
+            setShowLoja(event.currentTarget.checked);
+            form.setFieldValue('hasPhysicalStore', event.currentTarget.checked);
+          }}
+        />
+
+        <Switch
+          label="Possui e-commerce"
+          checked={showEcommerce}
+          onChange={(event) => {
+            setShowEcommerce(event.currentTarget.checked);
+            form.setFieldValue('hasEcommerce', event.currentTarget.checked);
+          }}
+        />
 
         <Group justify="space-between" mt="xl">
           <Button variant="outline" onClick={() => window.history.back()}>

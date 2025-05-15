@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 
 @Entity()
@@ -9,11 +9,15 @@ export class Address {
   @Column({ unique: true })
   userId: string;
 
-  @Column()
-  bairro: string;
+  @OneToOne(() => User, user => user.address)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column()
-  cep: string;
+  neighborhood: string;
+
+  @Column()
+  zipCode: string;
 
   @Column()
   street: string;
@@ -38,8 +42,4 @@ export class Address {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
-
-  @ManyToOne(() => User, user => user.address)
-  @JoinColumn({ name: 'userId' })
-  user: User;
 } 

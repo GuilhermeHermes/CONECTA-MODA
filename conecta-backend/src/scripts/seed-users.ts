@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module';
-import { AuthService } from '../modules/auth/auth.service';
-import { DocumentType } from '../modules/users/entities/user.entity';
+import { UsersService } from '../modules/users/users.service';
+import { DocumentType, UserRole, Gender } from '../modules/users/entities/user.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -27,17 +27,17 @@ const random = {
 
 // Base de dados para gerar usuários
 const userData = {
-  nomes: ['Ana', 'Carlos', 'Marina', 'Pedro', 'Juliana', 'Roberto', 'Fernanda', 'Paulo', 'Marcia', 'Gabriel', 'Bianca', 'André', 'Camila', 'Lucas', 'Tatiana'],
-  sobrenomes: ['Silva', 'Santos', 'Oliveira', 'Pereira', 'Costa', 'Rodrigues', 'Ferreira', 'Almeida', 'Nascimento', 'Lima', 'Araújo', 'Ribeiro', 'Martins'],
-  cidades: ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Salvador', 'Fortaleza', 'Brasília', 'Curitiba', 'Recife', 'Porto Alegre', 'Manaus'],
-  estados: ['SP', 'RJ', 'MG', 'BA', 'CE', 'DF', 'PR', 'PE', 'RS', 'AM'],
-  bairros: ['Centro', 'Jardim América', 'Vila Nova', 'Boa Vista', 'Santa Cecília', 'Pituba', 'Leblon', 'Copacabana', 'Barra', 'Ipanema'],
-  endereco: ['Rua das Flores', 'Avenida Brasil', 'Rua do Comércio', 'Alameda Santos', 'Avenida Paulista', 'Rua da Praia', 'Avenida Atlântica', 'Rua XV de Novembro'],
+  names: ['Ana', 'Carlos', 'Marina', 'Pedro', 'Juliana', 'Roberto', 'Fernanda', 'Paulo', 'Marcia', 'Gabriel', 'Bianca', 'André', 'Camila', 'Lucas', 'Tatiana'],
+  surnames: ['Silva', 'Santos', 'Oliveira', 'Pereira', 'Costa', 'Rodrigues', 'Ferreira', 'Almeida', 'Nascimento', 'Lima', 'Araújo', 'Ribeiro', 'Martins'],
+  cities: ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Salvador', 'Fortaleza', 'Brasília', 'Curitiba', 'Recife', 'Porto Alegre', 'Manaus'],
+  states: ['SP', 'RJ', 'MG', 'BA', 'CE', 'DF', 'PR', 'PE', 'RS', 'AM'],
+  neighborhoods: ['Centro', 'Jardim América', 'Vila Nova', 'Boa Vista', 'Santa Cecília', 'Pituba', 'Leblon', 'Copacabana', 'Barra', 'Ipanema'],
+  streets: ['Rua das Flores', 'Avenida Brasil', 'Rua do Comércio', 'Alameda Santos', 'Avenida Paulista', 'Rua da Praia', 'Avenida Atlântica', 'Rua XV de Novembro'],
   
   // Profissionais
-  habilidades: ['costura', 'modelagem', 'pilotagem', 'estilismo', 'desenho', 'estamparia', 'bordado', 'crochet', 'tricot', 'gestao', 'corte', 'acabamento'],
-  nomesAtelier: ['Ateliê Criativo', 'Costura & Arte', 'Moda Sob Medida', 'Criações Personalizadas', 'Alta Costura', 'Arte em Tecido', 'Mãos de Ouro', 'Feito com Amor', 'Moda Exclusiva', 'Corte Perfeito'],
-  biosProfissionais: [
+  skills: ['costura', 'modelagem', 'pilotagem', 'estilismo', 'desenho', 'estamparia', 'bordado', 'crochet', 'tricot', 'gestao', 'corte', 'acabamento'],
+  atelierNames: ['Ateliê Criativo', 'Costura & Arte', 'Moda Sob Medida', 'Criações Personalizadas', 'Alta Costura', 'Arte em Tecido', 'Mãos de Ouro', 'Feito com Amor', 'Moda Exclusiva', 'Corte Perfeito'],
+  professionalBios: [
     'Especialista em modelagem e costura de peças sob medida para ocasiões especiais.',
     'Designer de moda com foco em sustentabilidade e upcycling. Transformo roupas antigas em peças modernas.',
     'Costureiro com mais de 10 anos de experiência em alta costura e ajustes de roupas femininas.',
@@ -46,30 +46,30 @@ const userData = {
   ],
   
   // Marcas
-  nomesMarcsas: ['Elegance', 'Modas Brasil', 'Estilo Urbano', 'Moda & Cia', 'Fashion Style', 'Bella Moda', 'Chic & Cool', 'Urban Street', 'Golden Style', 'Pure Fashion'],
-  segmentos: ['feminino', 'masculino', 'infantil', 'plus-size', 'moda-praia', 'fitness', 'jeans', 'underwear'],
-  biosMarcas: [
-    'Marca de roupas femininas com foco em peças versáteis e atemporais para a mulher moderna.',
-    'Marca de moda praia que celebra a diversidade de corpos com estampas exclusivas.',
-    'Moda masculina casual com toques de alfaiataria, para homens que valorizam conforto e estilo.',
-    'Moda infantil lúdica e confortável, feita com materiais sustentáveis e seguros.',
-    'Jeanswear premium com modelagens exclusivas e acabamento de qualidade.'
+  brandNames: ['Elegance', 'Modas Brasil', 'Estilo Urbano', 'Moda & Cia', 'Fashion Style', 'Bella Moda', 'Chic & Cool', 'Urban Street', 'Golden Style', 'Pure Fashion'],
+  brandBios: [
+    'Marca de moda feminina com foco em peças atemporais e sustentáveis.',
+    'Especialista em moda casual e confortável para o dia a dia.',
+    'Marca de moda praia com design exclusivo e qualidade premium.',
+    'Moda masculina contemporânea com estilo urbano e sofisticado.',
+    'Marca de moda infantil com peças divertidas e confortáveis.'
   ],
+  segments: ['feminino', 'masculino', 'infantil', 'praia', 'plus-size', 'outros'],
   
   // Fornecedores
-  nomesEmpresas: ['TextilTech', 'AviMaster', 'Fios & Tecidos', 'EcoTecidos', 'TecnoFabric', 'StampArt', 'BordaTech', 'Aviamentos Premium', 'Tecidos Especiais', 'Embalagens Modernas'],
-  produtos: ['tecidos', 'aviamentos', 'estamparia', 'bordado', 'embalagens', 'etiquetas', 'maquinas', 'manequins', 'acabamento'],
-  biosFornecedores: [
-    'Fornecedor de tecidos importados de alta qualidade para confecção de roupas de festa e noivas.',
-    'Especializado em aviamentos diferenciados, com acabamentos em metal e pedrarias para confecção de alta costura.',
-    'Empresa de estamparia digital com tecnologia de ponta para pequenas e grandes produções.',
-    'Fornecimento de embalagens personalizadas e etiquetas sustentáveis para marcas de moda.',
-    'Tecidos tecnológicos com proteção UV, antimicrobianos e termorreguladores para moda esportiva.'
-  ]
+  supplierNames: ['Tecidos Premium', 'Materiais Moda', 'Fornecedor Express', 'Tecidos & Acessórios', 'Moda Supply', 'Tecidos Brasil', 'Materiais Fashion', 'Fornecedor Total', 'Tecidos & Cia', 'Moda Materiais'],
+  supplierBios: [
+    'Fornecedor de tecidos de alta qualidade para confecções.',
+    'Especialista em materiais para moda praia e fitness.',
+    'Fornecedor de acessórios e aviamentos para confecções.',
+    'Distribuidor de tecidos nacionais e importados.',
+    'Fornecedor completo para confecções de moda feminina.'
+  ],
+  products: ['tecidos', 'aviamentos', 'acessórios', 'materiais', 'ferramentas', 'equipamentos']
 };
 
 // Função para gerar imagem de perfil como base64 - imagem SVG gerada dinamicamente
-function generateProfileImage(name: string, type: 'professional' | 'enterprise' | 'supplier'): string {
+function generateProfileImage(name: string, type: 'PROFESSIONAL' | 'BRAND' | 'SUPPLIER'): string {
   // Extrair iniciais do nome
   const nameParts = name.split(' ');
   const initials = nameParts.length > 1 
@@ -81,13 +81,13 @@ function generateProfileImage(name: string, type: 'professional' | 'enterprise' 
   let textColor = '#FFFFFF';
   
   switch (type) {
-    case 'professional':
+    case 'PROFESSIONAL':
       bgColor = random.color(); 
       break;
-    case 'enterprise':
+    case 'BRAND':
       bgColor = random.color(); 
       break;
-    case 'supplier':
+    case 'SUPPLIER':
       bgColor = random.color(); 
       break;
   }
@@ -106,131 +106,134 @@ function generateProfileImage(name: string, type: 'professional' | 'enterprise' 
 
 // Função para criar um usuário profissional
 function createProfessional(index: number) {
-  const firstName = random.pick(userData.nomes);
-  const lastName = random.pick(userData.sobrenomes);
+  const firstName = random.pick(userData.names);
+  const lastName = random.pick(userData.surnames);
   const fullName = `${firstName} ${lastName}`;
-  const habilidades = Array(random.number(2, 4)).fill(0).map(() => random.pick(userData.habilidades));
+  const skills = Array(random.number(2, 4)).fill(0).map(() => random.pick(userData.skills));
   
   return {
-    nome: fullName,
+    name: fullName,
     email: `profissional${index}@exemplo.com`,
     password: 'Senha123!',
-    telefone: random.phone(),
+    phone: random.phone(),
     documentType: DocumentType.CPF,
-    cpf: random.cpf(),
-    cnpj: '',
-    dataNascimento: random.date(new Date(1970, 0, 1), new Date(2000, 0, 1)),
-    genero: random.pick(['Masculino', 'Feminino', 'Outro']),
-    endereco: random.pick(userData.endereco),
-    numero: random.number(1, 999).toString(),
-    bairro: random.pick(userData.bairros),
-    cidade: random.pick(userData.cidades),
-    estado: random.pick(userData.estados),
-    pais: 'Brasil',
-    cep: `${random.number(10000, 99999)}-${random.number(100, 999)}`,
+    documentNumber: random.cpf(),
+    birthDate: random.date(new Date(1970, 0, 1), new Date(2000, 0, 1)),
+    gender: random.pick([Gender.MALE, Gender.FEMALE, Gender.OTHER]),
+    address: {
+      street: random.pick(userData.streets),
+      number: random.number(1, 999).toString(),
+      neighborhood: random.pick(userData.neighborhoods),
+      city: random.pick(userData.cities),
+      state: random.pick(userData.states),
+      country: 'Brazil',
+      zipCode: `${random.number(10000, 99999)}-${random.number(100, 999)}`
+    },
     
     // Dados profissionais
-    role: 'profissional',
-    professionalName: `${random.pick(userData.nomesAtelier)} - ${firstName}`,
-    emailProfissional: `contato.${firstName.toLowerCase()}@exemplo.com`,
-    telefoneProfissional: random.phone(),
-    miniBio: random.pick(userData.biosProfissionais),
-    localizacaoProfissional: `${random.pick(userData.bairros)}, ${random.pick(userData.cidades)} - ${random.pick(userData.estados)}`,
-    habilidades,
+    roles: [UserRole.PROFESSIONAL],
+    professionalName: `${random.pick(userData.atelierNames)} - ${firstName}`,
+    professionalEmail: `contato.${firstName.toLowerCase()}@exemplo.com`,
+    professionalPhone: random.phone(),
+    miniBio: random.pick(userData.professionalBios),
+    professionalLocation: `${random.pick(userData.neighborhoods)}, ${random.pick(userData.cities)} - ${random.pick(userData.states)}`,
+    skills,
     instagram: `@${firstName.toLowerCase()}costura`,
     facebook: `${firstName.toLowerCase()}.costura`,
     linkedin: `${firstName.toLowerCase()}-${lastName.toLowerCase()}`,
     website: random.boolean() ? `https://www.${firstName.toLowerCase()}costura.com.br` : '',
     
     // Imagem de perfil
-    profileImageUrl: generateProfileImage(fullName, 'professional')
+    profileImageUrl: generateProfileImage(fullName, 'PROFESSIONAL')
   };
 }
 
 // Função para criar um usuário marca (empresa)
-function createEnterprise(index: number) {
-  const nomeMarca = random.pick(userData.nomesMarcsas);
-  const segmentos = Array(random.number(1, 3)).fill(0).map(() => random.pick(userData.segmentos));
+function createBrand(index: number) {
+  const brandName = random.pick(userData.brandNames);
+  const segments = Array(random.number(1, 3)).fill(0).map(() => random.pick(userData.segments));
   
   return {
-    nome: random.pick(userData.nomes) + ' ' + random.pick(userData.sobrenomes),
+    name: random.pick(userData.names) + ' ' + random.pick(userData.surnames),
     email: `marca${index}@exemplo.com`,
     password: 'Senha123!',
-    telefone: random.phone(),
+    phone: random.phone(),
     documentType: DocumentType.CNPJ,
-    cpf: '',
-    cnpj: random.cnpj(),
-    endereco: random.pick(userData.endereco),
-    numero: random.number(1, 999).toString(),
-    bairro: random.pick(userData.bairros),
-    cidade: random.pick(userData.cidades),
-    estado: random.pick(userData.estados),
-    pais: 'Brasil',
-    cep: `${random.number(10000, 99999)}-${random.number(100, 999)}`,
+    documentNumber: random.cnpj(),
+    address: {
+      street: random.pick(userData.streets),
+      number: random.number(1, 999).toString(),
+      neighborhood: random.pick(userData.neighborhoods),
+      city: random.pick(userData.cities),
+      state: random.pick(userData.states),
+      country: 'Brazil',
+      zipCode: `${random.number(10000, 99999)}-${random.number(100, 999)}`
+    },
     
     // Dados profissionais
-    role: 'marca',
-    professionalName: nomeMarca,
-    emailProfissional: `contato@${nomeMarca.toLowerCase().replace(/\s+/g, '')}.com.br`,
-    telefoneProfissional: random.phone(),
-    miniBio: random.pick(userData.biosMarcas),
-    localizacaoProfissional: `${random.pick(userData.bairros)}, ${random.pick(userData.cidades)} - ${random.pick(userData.estados)}`,
-    segmentos,
-    instagram: `@${nomeMarca.toLowerCase().replace(/\s+/g, '')}`,
-    facebook: `${nomeMarca.toLowerCase().replace(/\s+/g, '')}`,
-    linkedin: `${nomeMarca.toLowerCase().replace(/\s+/g, '-')}`,
-    website: `https://www.${nomeMarca.toLowerCase().replace(/\s+/g, '')}.com.br`,
-    possuiLojaTisica: random.boolean(),
-    possuiEcommerce: random.boolean(),
+    roles: [UserRole.BRAND],
+    professionalName: brandName,
+    professionalEmail: `contato@${brandName.toLowerCase().replace(/\s+/g, '')}.com.br`,
+    professionalPhone: random.phone(),
+    miniBio: random.pick(userData.brandBios),
+    professionalLocation: `${random.pick(userData.neighborhoods)}, ${random.pick(userData.cities)} - ${random.pick(userData.states)}`,
+    segments,
+    instagram: `@${brandName.toLowerCase().replace(/\s+/g, '')}`,
+    facebook: `${brandName.toLowerCase().replace(/\s+/g, '')}`,
+    linkedin: `${brandName.toLowerCase().replace(/\s+/g, '-')}`,
+    website: `https://www.${brandName.toLowerCase().replace(/\s+/g, '')}.com.br`,
+    hasPhysicalStore: random.boolean(),
+    hasEcommerce: random.boolean(),
     
     // Imagem de perfil
-    profileImageUrl: generateProfileImage(nomeMarca, 'enterprise')
+    profileImageUrl: generateProfileImage(brandName, 'BRAND')
   };
 }
 
 // Função para criar um usuário fornecedor
 function createSupplier(index: number) {
-  const nomeEmpresa = random.pick(userData.nomesEmpresas);
-  const produtos = Array(random.number(2, 4)).fill(0).map(() => random.pick(userData.produtos));
+  const supplierName = random.pick(userData.supplierNames);
+  const products = Array(random.number(2, 4)).fill(0).map(() => random.pick(userData.products));
   
   return {
-    nome: random.pick(userData.nomes) + ' ' + random.pick(userData.sobrenomes),
+    name: random.pick(userData.names) + ' ' + random.pick(userData.surnames),
     email: `fornecedor${index}@exemplo.com`,
     password: 'Senha123!',
-    telefone: random.phone(),
+    phone: random.phone(),
     documentType: DocumentType.CNPJ,
-    cpf: '',
-    cnpj: random.cnpj(),
-    endereco: random.pick(userData.endereco),
-    numero: random.number(1, 999).toString(),
-    bairro: random.pick(userData.bairros),
-    cidade: random.pick(userData.cidades),
-    estado: random.pick(userData.estados),
-    pais: 'Brasil',
-    cep: `${random.number(10000, 99999)}-${random.number(100, 999)}`,
+    documentNumber: random.cnpj(),
+    address: {
+      street: random.pick(userData.streets),
+      number: random.number(1, 999).toString(),
+      neighborhood: random.pick(userData.neighborhoods),
+      city: random.pick(userData.cities),
+      state: random.pick(userData.states),
+      country: 'Brazil',
+      zipCode: `${random.number(10000, 99999)}-${random.number(100, 999)}`
+    },
     
     // Dados profissionais
-    role: 'fornecedor',
-    professionalName: nomeEmpresa,
-    emailProfissional: `contato@${nomeEmpresa.toLowerCase().replace(/\s+/g, '')}.com.br`,
-    telefoneProfissional: random.phone(),
-    miniBio: random.pick(userData.biosFornecedores),
-    localizacaoProfissional: `${random.pick(userData.bairros)}, ${random.pick(userData.cidades)} - ${random.pick(userData.estados)}`,
-    produtos,
-    instagram: `@${nomeEmpresa.toLowerCase().replace(/\s+/g, '')}`,
-    facebook: `${nomeEmpresa.toLowerCase().replace(/\s+/g, '')}`,
-    linkedin: `${nomeEmpresa.toLowerCase().replace(/\s+/g, '-')}`,
-    website: `https://www.${nomeEmpresa.toLowerCase().replace(/\s+/g, '')}.com.br`,
+    roles: [UserRole.SUPPLIER],
+    professionalName: supplierName,
+    professionalEmail: `contato@${supplierName.toLowerCase().replace(/\s+/g, '')}.com.br`,
+    professionalPhone: random.phone(),
+    miniBio: random.pick(userData.supplierBios),
+    professionalLocation: `${random.pick(userData.neighborhoods)}, ${random.pick(userData.cities)} - ${random.pick(userData.states)}`,
+    products,
+    instagram: `@${supplierName.toLowerCase().replace(/\s+/g, '')}`,
+    facebook: `${supplierName.toLowerCase().replace(/\s+/g, '')}`,
+    linkedin: `${supplierName.toLowerCase().replace(/\s+/g, '-')}`,
+    website: `https://www.${supplierName.toLowerCase().replace(/\s+/g, '')}.com.br`,
     
     // Imagem de perfil
-    profileImageUrl: generateProfileImage(nomeEmpresa, 'supplier')
+    profileImageUrl: generateProfileImage(supplierName, 'SUPPLIER')
   };
 }
 
 async function seedDatabase() {
   // Inicializar a aplicação NestJS
   const app = await NestFactory.createApplicationContext(AppModule);
-  const authService = app.get(AuthService);
+  const usersService = app.get(UsersService);
   
   try {
     console.log('Iniciando processo de seed...');
@@ -246,15 +249,15 @@ async function seedDatabase() {
     console.log('Criando profissionais...');
     for (let i = 1; i <= 5; i++) {
       const professionalData = createProfessional(i);
-      await authService.register(professionalData);
+      await usersService.create(professionalData);
       console.log(`Profissional ${i} criado: ${professionalData.email}`);
     }
     
     // Criar 5 marcas
     console.log('Criando marcas...');
     for (let i = 1; i <= 5; i++) {
-      const enterpriseData = createEnterprise(i);
-      await authService.register(enterpriseData);
+      const enterpriseData = createBrand(i);
+      await usersService.create(enterpriseData);
       console.log(`Marca ${i} criada: ${enterpriseData.email}`);
     }
     
@@ -262,7 +265,7 @@ async function seedDatabase() {
     console.log('Criando fornecedores...');
     for (let i = 1; i <= 5; i++) {
       const supplierData = createSupplier(i);
-      await authService.register(supplierData);
+      await usersService.create(supplierData);
       console.log(`Fornecedor ${i} criado: ${supplierData.email}`);
     }
     

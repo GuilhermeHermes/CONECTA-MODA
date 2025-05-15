@@ -1,39 +1,50 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Container, Title, Text, Button, Loader, Paper, Group, Avatar, Badge, Divider, List, ThemeIcon, SimpleGrid } from '@mantine/core';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
 import { IconMapPin, IconPhone, IconAt, IconWorld, IconBrandInstagram, IconBrandFacebook, IconBrandLinkedin, IconListCheck } from '@tabler/icons-react';
-
 import { config } from '@/config';
 
 interface UserProfile {
   id: string;
-  nome: string;
+  name: string;
   email: string;
   professionalName: string;
   miniBio: string;
-  profileImageUrl: string;
+  profilePicture: string | null;
   roles: string[];
-  localizacaoProfissional: string;
-  telefoneProfissional: string;
-  emailProfissional: string;
-  website: string;
-  instagram: string;
-  facebook: string;
-  linkedin: string;
-  habilidades: string[];
-  produtos: string[];
-  segmentos: string[];
+  professionalLocation: string;
+  professionalPhone: string;
+  professionalEmail: string;
+  website: string | null;
+  instagram: string | null;
+  facebook: string | null;
+  linkedin: string | null;
+  skills: string[];
+  products: string[];
+  segments: string[];
+  address?: {
+    neighborhood: string;
+    zipCode: string;
+    street: string;
+    number: string;
+    complement: string | null;
+    city: string;
+    state: string;
+    country: string;
+  };
 }
 
-export default function ProfilePage({ params }: { params: { id: string } }) {
+export default function ProfilePage({ params }: { params: Promise<{ id: string }>}) {
   const { isAuthenticated, isLoading, token } = useAuth();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { id } = use(params);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -45,7 +56,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
       if (!token) return;
 
       try {
-        const response = await axios.get(`${config.api.baseURL}/users/${params.id}`, {
+        const response = await axios.get(`${config.api.baseURL}/users/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProfile(response.data);
@@ -59,7 +70,7 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     if (isAuthenticated && token) {
       fetchProfile();
     }
-  }, [isLoading, isAuthenticated, token, params.id, router]);
+  }, [isLoading, isAuthenticated, token, id, router]);
 
   if (isLoading || loading) {
     return (
@@ -79,15 +90,15 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     );
   }
 
-  const isProfessional = profile.roles?.includes('professional');
-  const isSupplier = profile.roles?.includes('supplier');
-  const isEnterprise = profile.roles?.includes('enterprise');
+  const isProfessional = profile.roles?.includes('PROFESSIONAL');
+  const isSupplier = profile.roles?.includes('SUPPLIER');
+  const isBrand = profile.roles?.includes('BRAND');
 
   // Obtendo o tipo de perfil
   const getProfileType = () => {
     if (isProfessional) return { label: 'Profissional', color: 'blue' };
     if (isSupplier) return { label: 'Fornecedor', color: 'grape' };
-    if (isEnterprise) return { label: 'Marca/Empresa', color: 'teal' };
+    if (isBrand) return { label: 'Marca/Empresa', color: 'teal' };
     return { label: 'Usuário', color: 'gray' };
   };
 
@@ -98,14 +109,14 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     let items: string[] = [];
     let title = '';
 
-    if (isProfessional && profile.habilidades?.length) {
-      items = profile.habilidades;
+    if (isProfessional && profile.skills?.length) {
+      items = profile.skills;
       title = 'Habilidades';
-    } else if (isSupplier && profile.produtos?.length) {
-      items = profile.produtos;
+    } else if (isSupplier && profile.products?.length) {
+      items = profile.products;
       title = 'Produtos';
-    } else if (isEnterprise && profile.segmentos?.length) {
-      items = profile.segmentos;
+    } else if (isBrand && profile.segments?.length) {
+      items = profile.segments;
       title = 'Segmentos';
     }
 
@@ -133,11 +144,11 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
     <Container size="md" py="xl">
       <Paper p="lg" radius="md" shadow="sm" withBorder>
         <Group mb="md" style={{ alignItems: 'flex-start' }}>
-          <Avatar src={profile.profileImageUrl} size={120} radius="md" />
+          <Avatar src={profile.profilePicture} size={120} radius="md" />
           <div style={{ flex: 1 }}>
             <Group justify="space-between" align="flex-start">
               <div>
-                <Title order={3}>{profile.professionalName || profile.nome}</Title>
+                <Title order={3}>{profile.professionalName || profile.name}</Title>
                 <Badge color={profileType.color} my="xs">{profileType.label}</Badge>
               </div>
               <Button variant="outline" color={profileType.color} onClick={() => router.push('/dashboard')}>
@@ -152,19 +163,19 @@ export default function ProfilePage({ params }: { params: { id: string } }) {
 
         <Title order={4} mb="xs">Contato</Title>
         <List spacing="xs">
-          {profile.localizacaoProfissional && (
+          {profile.professionalLocation && (
             <List.Item icon={<IconMapPin size={16} color="gray" />}>
-              <Text size="sm">{profile.localizacaoProfissional}</Text>
+              <Text size="sm">{profile.professionalLocation}</Text>
             </List.Item>
           )}
-          {profile.telefoneProfissional && (
+          {profile.professionalPhone && (
             <List.Item icon={<IconPhone size={16} color="gray" />}>
-              <Text size="sm">{profile.telefoneProfissional}</Text>
+              <Text size="sm">{profile.professionalPhone}</Text>
             </List.Item>
           )}
-          {profile.emailProfissional && (
+          {profile.professionalEmail && (
             <List.Item icon={<IconAt size={16} color="gray" />}>
-              <Text size="sm">{profile.emailProfissional}</Text>
+              <Text size="sm">{profile.professionalEmail}</Text>
             </List.Item>
           )}
         </List>
