@@ -282,7 +282,19 @@ export default function DashboardPage() {
 {filteredProfessionals.length > 0 ? (
   <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
     {filteredProfessionals.map((prof) => (
-      <Card key={prof.id} shadow="sm" padding="lg" radius="md" withBorder>
+      <Card
+        key={prof.id}
+        shadow="sm"
+        padding="lg"
+        radius="md"
+        withBorder
+        style={{
+          height: 360,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
+        }}
+      >
         <Card.Section>
           <Group px="md" pt="md">
             <Avatar 
@@ -311,6 +323,8 @@ export default function DashboardPage() {
             </Badge>
           ))}
         </Group>
+
+        <div style={{ flex: 1 }} /> 
 
         <Group mt="md" gap="xs" wrap="wrap">
           {prof.website && (
@@ -372,6 +386,7 @@ export default function DashboardPage() {
           fullWidth 
           mt="md" 
           radius="md"
+          style={{ marginTop: 12 }}
           onClick={() => router.push(`/profile/${prof.id}`)}
         >
           Ver perfil
@@ -387,11 +402,23 @@ export default function DashboardPage() {
           {filteredSuppliers.length > 0 ? (
             <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
               {filteredSuppliers.map((SUPPLIER) => (
-                <Card key={SUPPLIER.id} shadow="sm" padding="lg" radius="md" withBorder>
+                <Card
+                  key={SUPPLIER.id}
+                  shadow="sm"
+                  padding="lg"
+                  radius="md"
+                  withBorder
+                  style={{
+                    height: 360,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                  }}
+                >
                   <Card.Section>
                     <Group px="md" pt="md">
                       <Avatar 
-                        src={SUPPLIER.profilePicture} 
+                        src={SUPPLIER.profileImageUrl} 
                         size="lg" 
                         radius="xl"
                       />
@@ -401,18 +428,85 @@ export default function DashboardPage() {
                       </div>
                     </Group>
                   </Card.Section>
+
                   <Text c="dimmed" size="sm" mt="md" lineClamp={3}>
                     {SUPPLIER.miniBio || "Sem descrição"}
                   </Text>
                   <Text c="dimmed" size="xs" mt="xs">
                     {SUPPLIER.professionalLocation || "Localização não informada"}
                   </Text>
+
+                  <Group mt="md" gap="xs" wrap="wrap">
+                    {SUPPLIER.skills?.map((skill, index) => (
+                      <Badge key={`${skill}-${index}`} size="sm">
+                        {skill}
+                      </Badge>
+                    ))}
+                  </Group>
+
+                  <div style={{ flex: 1 }} />
+
+                  <Group mt="md" gap="xs" wrap="wrap">
+                    {SUPPLIER.website && (
+                      <Button
+                        component="a"
+                        href={SUPPLIER.website}
+                        target="_blank"
+                        leftSection={<IconWorld size={16} />}
+                        variant="subtle"
+                        size="xs"
+                      >
+                        Website
+                      </Button>
+                    )}
+                    {SUPPLIER.instagram && (
+                      <Button
+                        component="a"
+                        href={`https://instagram.com/${SUPPLIER.instagram.replace('@', '')}`}
+                        target="_blank"
+                        leftSection={<IconBrandInstagram size={16} />}
+                        variant="subtle"
+                        size="xs"
+                        color="pink"
+                      >
+                        Instagram
+                      </Button>
+                    )}
+                    {SUPPLIER.facebook && (
+                      <Button
+                        component="a"
+                        href={`https://facebook.com/${SUPPLIER.facebook}`}
+                        target="_blank"
+                        leftSection={<IconBrandFacebook size={16} />}
+                        variant="subtle"
+                        size="xs"
+                        color="blue"
+                      >
+                        Facebook
+                      </Button>
+                    )}
+                    {SUPPLIER.linkedin && (
+                      <Button
+                        component="a"
+                        href={`https://linkedin.com/in/${SUPPLIER.linkedin}`}
+                        target="_blank"
+                        leftSection={<IconBrandLinkedin size={16} />}
+                        variant="subtle"
+                        size="xs"
+                        color="indigo"
+                      >
+                        LinkedIn
+                      </Button>
+                    )}
+                  </Group>
+
                   <Button 
                     variant="light" 
                     color="grape" 
                     fullWidth 
                     mt="md" 
                     radius="md"
+                    style={{ marginTop: 12 }}
                     onClick={() => router.push(`/profile/${SUPPLIER.id}`)}
                   >
                     Ver perfil
