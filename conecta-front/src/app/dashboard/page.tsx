@@ -278,90 +278,110 @@ export default function DashboardPage() {
             onRoleChange={handleRoleChange}
             onSearch={handleSearch}
           />
-          <Title order={3} mt="xl" mb="md">Profissionais de Moda</Title>
-          {filteredProfessionals.length > 0 ? (
-            <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-              {filteredProfessionals.map((prof) => (
-                <Paper key={prof.id} p="md" radius="md" withBorder>
-                  <Group>
-                    <Avatar src={prof.profilePicture} size={60} radius="md" />
-                    <div style={{ flex: 1 }}>
-                      <Text fw={500} size="lg">
-                        {prof.professionalName}
-                      </Text>
-                      <Text size="sm" c="dimmed" lineClamp={2}>
-                        {prof.miniBio}
-                      </Text>
-                    </div>
-                  </Group>
+         <Title order={3} mt="xl" mb="md">Profissionais de Moda</Title>
+{filteredProfessionals.length > 0 ? (
+  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+    {filteredProfessionals.map((prof) => (
+      <Card key={prof.id} shadow="sm" padding="lg" radius="md" withBorder>
+        <Card.Section>
+          <Group px="md" pt="md">
+            <Avatar 
+              src={prof.profilePicture} 
+              size="lg" 
+              radius="xl"
+            />
+            <div>
+              <Text fw={500} size="lg">{prof.professionalName}</Text>
+              <Badge color="blue">Profissional</Badge>
+            </div>
+          </Group>
+        </Card.Section>
 
-                  <Group mt="md" gap="xs">
-                    {prof.skills.map((skill, index) => (
-                      <Badge key={`${skill}-${index}`} size="sm">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </Group>
+        <Text c="dimmed" size="sm" mt="md" lineClamp={3}>
+          {prof.miniBio || "Sem descrição"}
+        </Text>
+        <Text c="dimmed" size="xs" mt="xs">
+          {prof.professionalLocation || "Localização não informada"}
+        </Text>
 
-                  <Group mt="md" gap="xs">
-                    {prof.website && (
-                      <Button
-                        component="a"
-                        href={prof.website}
-                        target="_blank"
-                        leftSection={<IconWorld size={16} />}
-                        variant="subtle"
-                        size="xs"
-                      >
-                        Website
-                      </Button>
-                    )}
-                    {prof.instagram && (
-                      <Button
-                        component="a"
-                        href={`https://instagram.com/${prof.instagram.replace('@', '')}`}
-                        target="_blank"
-                        leftSection={<IconBrandInstagram size={16} />}
-                        variant="subtle"
-                        size="xs"
-                        color="pink"
-                      >
-                        Instagram
-                      </Button>
-                    )}
-                    {prof.facebook && (
-                      <Button
-                        component="a"
-                        href={`https://facebook.com/${prof.facebook}`}
-                        target="_blank"
-                        leftSection={<IconBrandFacebook size={16} />}
-                        variant="subtle"
-                        size="xs"
-                        color="blue"
-                      >
-                        Facebook
-                      </Button>
-                    )}
-                    {prof.linkedin && (
-                      <Button
-                        component="a"
-                        href={`https://linkedin.com/in/${prof.linkedin}`}
-                        target="_blank"
-                        leftSection={<IconBrandLinkedin size={16} />}
-                        variant="subtle"
-                        size="xs"
-                        color="indigo"
-                      >
-                        LinkedIn
-                      </Button>
-                    )}
-                  </Group>
-                </Paper>
-              ))}
-            </SimpleGrid>
-          ) : (
-            <Text c="dimmed" ta="center">Nenhum profissional encontrado</Text>
+        <Group mt="md" gap="xs" wrap="wrap">
+          {prof.skills.map((skill, index) => (
+            <Badge key={`${skill}-${index}`} size="sm">
+              {skill}
+            </Badge>
+          ))}
+        </Group>
+
+        <Group mt="md" gap="xs" wrap="wrap">
+          {prof.website && (
+            <Button
+              component="a"
+              href={prof.website}
+              target="_blank"
+              leftSection={<IconWorld size={16} />}
+              variant="subtle"
+              size="xs"
+            >
+              Website
+            </Button>
           )}
+          {prof.instagram && (
+            <Button
+              component="a"
+              href={`https://instagram.com/${prof.instagram.replace('@', '')}`}
+              target="_blank"
+              leftSection={<IconBrandInstagram size={16} />}
+              variant="subtle"
+              size="xs"
+              color="pink"
+            >
+              Instagram
+            </Button>
+          )}
+          {prof.facebook && (
+            <Button
+              component="a"
+              href={`https://facebook.com/${prof.facebook}`}
+              target="_blank"
+              leftSection={<IconBrandFacebook size={16} />}
+              variant="subtle"
+              size="xs"
+              color="blue"
+            >
+              Facebook
+            </Button>
+          )}
+          {prof.linkedin && (
+            <Button
+              component="a"
+              href={`https://linkedin.com/in/${prof.linkedin}`}
+              target="_blank"
+              leftSection={<IconBrandLinkedin size={16} />}
+              variant="subtle"
+              size="xs"
+              color="indigo"
+            >
+              LinkedIn
+            </Button>
+          )}
+        </Group>
+
+        <Button 
+          variant="light" 
+          color="blue" 
+          fullWidth 
+          mt="md" 
+          radius="md"
+          onClick={() => router.push(`/profile/${prof.id}`)}
+        >
+          Ver perfil
+        </Button>
+      </Card>
+    ))}
+  </SimpleGrid>
+) : (
+  <Text c="dimmed" ta="center">Nenhum profissional encontrado</Text>
+)}
 
           <Title order={3} mt="xl" mb="md">Fornecedores</Title>
           {filteredSuppliers.length > 0 ? (
