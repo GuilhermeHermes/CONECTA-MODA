@@ -8,6 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
+import { FilterUsersDto } from './dto/filter-users.dto';
 
 @Injectable()
 export class UsersService {
@@ -150,5 +151,89 @@ export class UsersService {
     const user = await this.findOne(id);
     user.roles = user.roles.filter(r => r !== role);
     return this.usersRepository.save(user);
+  }
+
+  async findProfessionals(filterDto: FilterUsersDto) {
+    const { search, location, skills, page = 1, limit = 10 } = filterDto;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.usersRepository
+      .createQueryBuilder('user')
+      .where(':role = ANY(user.roles)', { role: UserRole.PROFESSIONAL })
+      .leftJoinAndSelect('user.address', 'address');
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(LOWER(user.professionalName) LIKE LOWER(:search) OR LOWER(user.miniBio) LIKE LOWER(:search))',
+        { search: `%${search}%` }
+      );
+    }
+
+    if (location) {
+      queryBuilder.andWhere('LOWER(user.professionalLocation) LIKE LOWER(:location)', {
+        location: `%${location}%`
+      });
+    }
+
+    if (skills && skills.length > 0) {
+      queryBuilder.andWhere('user.skills @> ARRAY[:...skills]::text[]', { skills });
+    }
+
+    const [users, total] = await queryBuilder
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  }
+
+  async findSuppliers(filterDto: FilterUsersDto) {
+    const { search, location, products, page = 1, limit = 10 } = filterDto;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.usersRepository
+      .createQueryBuilder('user')
+      .where(':role = ANY(user.roles)', { role: UserRole.SUPPLIER })
+      .leftJoinAndSelect('user.address', 'address');
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(LOWER(user.professionalName) LIKE LOWER(:search) OR LOWER(user.miniBio) LIKE LOWER(:search))',
+        { search: `%${search}%` }
+      );
+    }
+
+    if (location) {
+      queryBuilder.andWhere('LOWER(user.professionalLocation) LIKE LOWER(:location)', {
+        location: `%${location}%`
+      });
+    }
+
+    if (products && products.length > 0) {
+      queryBuilder.andWhere('user.products @> ARRAY[:...products]::text[]', { products });
+    }
+
+    const [users, total] = await queryBuilder
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
   }
 } 

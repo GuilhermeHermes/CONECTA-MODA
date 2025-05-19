@@ -27,45 +27,141 @@ const random = {
 
 // Base de dados para gerar usuários
 const userData = {
-  names: ['Ana', 'Carlos', 'Marina', 'Pedro', 'Juliana', 'Roberto', 'Fernanda', 'Paulo', 'Marcia', 'Gabriel', 'Bianca', 'André', 'Camila', 'Lucas', 'Tatiana'],
-  surnames: ['Silva', 'Santos', 'Oliveira', 'Pereira', 'Costa', 'Rodrigues', 'Ferreira', 'Almeida', 'Nascimento', 'Lima', 'Araújo', 'Ribeiro', 'Martins'],
-  cities: ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Salvador', 'Fortaleza', 'Brasília', 'Curitiba', 'Recife', 'Porto Alegre', 'Manaus'],
-  states: ['SP', 'RJ', 'MG', 'BA', 'CE', 'DF', 'PR', 'PE', 'RS', 'AM'],
-  neighborhoods: ['Centro', 'Jardim América', 'Vila Nova', 'Boa Vista', 'Santa Cecília', 'Pituba', 'Leblon', 'Copacabana', 'Barra', 'Ipanema'],
-  streets: ['Rua das Flores', 'Avenida Brasil', 'Rua do Comércio', 'Alameda Santos', 'Avenida Paulista', 'Rua da Praia', 'Avenida Atlântica', 'Rua XV de Novembro'],
+  names: [
+    'Ana', 'Carlos', 'Marina', 'Pedro', 'Juliana', 'Roberto', 'Fernanda', 'Paulo', 'Marcia', 'Gabriel',
+    'Bianca', 'André', 'Camila', 'Lucas', 'Tatiana', 'Rafael', 'Isabela', 'Bruno', 'Larissa', 'Diego',
+    'Amanda', 'Thiago', 'Carolina', 'Felipe', 'Beatriz', 'Leonardo', 'Mariana', 'Rodrigo', 'Júlia', 'Matheus',
+    'Laura', 'Guilherme', 'Luiza', 'Daniel', 'Vitória', 'Eduardo', 'Sofia', 'João', 'Valentina', 'Miguel'
+  ],
+  surnames: [
+    'Silva', 'Santos', 'Oliveira', 'Pereira', 'Costa', 'Rodrigues', 'Ferreira', 'Almeida', 'Nascimento', 'Lima',
+    'Araújo', 'Ribeiro', 'Martins', 'Carvalho', 'Melo', 'Cardoso', 'Souza', 'Cavalcanti', 'Dias', 'Castro',
+    'Gomes', 'Mendes', 'Barbosa', 'Fernandes', 'Lopes', 'Monteiro', 'Moraes', 'Nunes', 'Pinto', 'Rocha'
+  ],
+  cities: [
+    'São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Salvador', 'Fortaleza', 'Brasília', 'Curitiba', 'Recife',
+    'Porto Alegre', 'Manaus', 'Belém', 'Goiânia', 'Guarulhos', 'Campinas', 'São Luís', 'Maceió', 'Teresina',
+    'Natal', 'Campo Grande', 'João Pessoa', 'São José dos Campos', 'Ribeirão Preto', 'Uberlândia', 'Sorocaba'
+  ],
+  states: [
+    'SP', 'RJ', 'MG', 'BA', 'CE', 'DF', 'PR', 'PE', 'RS', 'AM', 'PA', 'GO', 'MA', 'AL', 'PI', 'RN', 'MS',
+    'PB', 'SC', 'ES', 'RO', 'TO', 'AC', 'AP', 'RR'
+  ],
+  neighborhoods: [
+    'Centro', 'Jardim América', 'Vila Nova', 'Boa Vista', 'Santa Cecília', 'Pituba', 'Leblon', 'Copacabana',
+    'Barra', 'Ipanema', 'Moema', 'Vila Mariana', 'Pinheiros', 'Jardins', 'Vila Madalena', 'Brooklin',
+    'Campo Belo', 'Morumbi', 'Itaim Bibi', 'Jardim Paulista', 'Vila Olímpia', 'Paraíso', 'Bela Vista',
+    'Consolação', 'Higienópolis', 'Vila Leopoldina', 'Lapa', 'Vila Pompéia', 'Perdizes', 'Vila Buarque'
+  ],
+  streets: [
+    'Rua das Flores', 'Avenida Brasil', 'Rua do Comércio', 'Alameda Santos', 'Avenida Paulista',
+    'Rua da Praia', 'Avenida Atlântica', 'Rua XV de Novembro', 'Rua Augusta', 'Avenida Rebouças',
+    'Rua Oscar Freire', 'Avenida Brigadeiro Faria Lima', 'Rua Haddock Lobo', 'Avenida Berrini',
+    'Rua Maria Antônia', 'Avenida Jabaquara', 'Rua da Consolação', 'Avenida São João',
+    'Rua 25 de Março', 'Avenida Ipiranga', 'Rua Vergueiro', 'Avenida 9 de Julho',
+    'Rua Bela Cintra', 'Avenida Europa', 'Rua Estados Unidos'
+  ],
   
   // Profissionais
-  skills: ['costura', 'modelagem', 'pilotagem', 'estilismo', 'desenho', 'estamparia', 'bordado', 'crochet', 'tricot', 'gestao', 'corte', 'acabamento'],
-  atelierNames: ['Ateliê Criativo', 'Costura & Arte', 'Moda Sob Medida', 'Criações Personalizadas', 'Alta Costura', 'Arte em Tecido', 'Mãos de Ouro', 'Feito com Amor', 'Moda Exclusiva', 'Corte Perfeito'],
+  skills: [
+    'costura', 'modelagem', 'pilotagem', 'estilismo', 'desenho', 'estamparia', 'bordado', 'crochet',
+    'tricot', 'gestao', 'corte', 'acabamento', 'alfaiataria', 'alta costura', 'moda praia',
+    'moda íntima', 'moda fitness', 'moda infantil', 'moda masculina', 'moda feminina',
+    'moda plus size', 'moda sustentável', 'upcycling', 'customização', 'serigrafia',
+    'estampa digital', 'bordado à máquina', 'bordado à mão', 'patchwork', 'quiltagem'
+  ],
+  atelierNames: [
+    'Ateliê Criativo', 'Costura & Arte', 'Moda Sob Medida', 'Criações Personalizadas', 'Alta Costura',
+    'Arte em Tecido', 'Mãos de Ouro', 'Feito com Amor', 'Moda Exclusiva', 'Corte Perfeito',
+    'Ateliê da Moda', 'Costura Premium', 'Moda & Estilo', 'Criações Únicas', 'Alta Moda',
+    'Arte & Costura', 'Mãos Talentosas', 'Feito à Mão', 'Moda Personalizada', 'Corte & Costura',
+    'Ateliê Fashion', 'Costura Elegante', 'Moda & Design', 'Criações Especiais', 'Alta Fashion',
+    'Arte & Moda', 'Mãos Especiais', 'Feito com Carinho', 'Moda Sob Medida', 'Corte & Estilo'
+  ],
   professionalBios: [
     'Especialista em modelagem e costura de peças sob medida para ocasiões especiais.',
     'Designer de moda com foco em sustentabilidade e upcycling. Transformo roupas antigas em peças modernas.',
     'Costureiro com mais de 10 anos de experiência em alta costura e ajustes de roupas femininas.',
     'Modelista especializada em alfaiataria feminina com técnicas tradicionais italianas.',
-    'Estilista de moda praia com design exclusivo e acabamento de qualidade.'
+    'Estilista de moda praia com design exclusivo e acabamento de qualidade.',
+    'Especialista em moda sustentável e upcycling, criando peças únicas a partir de materiais reciclados.',
+    'Costureira com expertise em moda íntima e lingerie de alta qualidade.',
+    'Modelista especializado em alfaiataria masculina com técnicas inglesas tradicionais.',
+    'Designer de moda infantil com foco em conforto e durabilidade.',
+    'Especialista em moda plus size, criando peças que valorizam todas as formas.',
+    'Costureira com experiência em alta costura e vestidos de noiva.',
+    'Modelista especializada em moda fitness e performance.',
+    'Designer de moda masculina contemporânea com toque clássico.',
+    'Especialista em customização e personalização de peças.',
+    'Costureira com expertise em bordados e técnicas artesanais.'
   ],
   
   // Marcas
-  brandNames: ['Elegance', 'Modas Brasil', 'Estilo Urbano', 'Moda & Cia', 'Fashion Style', 'Bella Moda', 'Chic & Cool', 'Urban Street', 'Golden Style', 'Pure Fashion'],
+  brandNames: [
+    'Elegance', 'Modas Brasil', 'Estilo Urbano', 'Moda & Cia', 'Fashion Style',
+    'Bella Moda', 'Chic & Cool', 'Urban Street', 'Golden Style', 'Pure Fashion',
+    'Moda Express', 'Style Brasil', 'Fashion House', 'Moda & Design', 'Elegant Style',
+    'Fashion Lab', 'Moda & Arte', 'Style & Co', 'Fashion Box', 'Moda & Estilo',
+    'Elegant Fashion', 'Style House', 'Fashion & Co', 'Moda & Style', 'Elegant Lab',
+    'Fashion Art', 'Moda & Design', 'Style Box', 'Fashion & Style', 'Moda & Co'
+  ],
   brandBios: [
     'Marca de moda feminina com foco em peças atemporais e sustentáveis.',
     'Especialista em moda casual e confortável para o dia a dia.',
     'Marca de moda praia com design exclusivo e qualidade premium.',
     'Moda masculina contemporânea com estilo urbano e sofisticado.',
-    'Marca de moda infantil com peças divertidas e confortáveis.'
+    'Marca de moda infantil com peças divertidas e confortáveis.',
+    'Especialista em moda sustentável e eco-friendly.',
+    'Marca de moda plus size com design exclusivo e confortável.',
+    'Especialista em moda fitness e performance.',
+    'Marca de moda íntima com design sofisticado e confortável.',
+    'Especialista em moda masculina casual e elegante.',
+    'Marca de moda feminina com foco em peças versáteis e atemporais.',
+    'Especialista em moda praia e verão com design exclusivo.',
+    'Marca de moda infantil com foco em conforto e durabilidade.',
+    'Especialista em moda sustentável e upcycling.',
+    'Marca de moda masculina com design contemporâneo e sofisticado.'
   ],
-  segments: ['feminino', 'masculino', 'infantil', 'praia', 'plus-size', 'outros'],
+  segments: [
+    'feminino', 'masculino', 'infantil', 'praia', 'plus-size', 'outros',
+    'sustentável', 'fitness', 'íntima', 'casual', 'formal', 'esportivo',
+    'praia', 'verão', 'inverno', 'primavera', 'outono', 'alta costura',
+    'fast fashion', 'slow fashion', 'luxo', 'contemporâneo', 'clássico',
+    'urbano', 'streetwear', 'minimalista', 'romântico', 'vintage'
+  ],
   
   // Fornecedores
-  supplierNames: ['Tecidos Premium', 'Materiais Moda', 'Fornecedor Express', 'Tecidos & Acessórios', 'Moda Supply', 'Tecidos Brasil', 'Materiais Fashion', 'Fornecedor Total', 'Tecidos & Cia', 'Moda Materiais'],
+  supplierNames: [
+    'Tecidos Premium', 'Materiais Moda', 'Fornecedor Express', 'Tecidos & Acessórios', 'Moda Supply',
+    'Tecidos Brasil', 'Materiais Fashion', 'Fornecedor Total', 'Tecidos & Cia', 'Moda Materiais',
+    'Tecidos Express', 'Materiais & Cia', 'Fornecedor Premium', 'Tecidos & Moda', 'Moda & Materiais',
+    'Tecidos Fashion', 'Materiais Express', 'Fornecedor & Cia', 'Tecidos & Style', 'Moda & Tecidos',
+    'Tecidos & Design', 'Materiais & Style', 'Fornecedor Fashion', 'Tecidos & Arte', 'Moda & Design'
+  ],
   supplierBios: [
     'Fornecedor de tecidos de alta qualidade para confecções.',
     'Especialista em materiais para moda praia e fitness.',
     'Fornecedor de acessórios e aviamentos para confecções.',
     'Distribuidor de tecidos nacionais e importados.',
-    'Fornecedor completo para confecções de moda feminina.'
+    'Fornecedor completo para confecções de moda feminina.',
+    'Especialista em tecidos sustentáveis e eco-friendly.',
+    'Fornecedor de materiais para alta costura e luxo.',
+    'Distribuidor de aviamentos e acessórios premium.',
+    'Fornecedor de tecidos para moda masculina.',
+    'Especialista em materiais para moda infantil.',
+    'Fornecedor de tecidos para moda plus size.',
+    'Distribuidor de materiais para moda fitness.',
+    'Fornecedor de tecidos para moda íntima.',
+    'Especialista em materiais para moda praia.',
+    'Fornecedor completo para moda sustentável.'
   ],
-  products: ['tecidos', 'aviamentos', 'acessórios', 'materiais', 'ferramentas', 'equipamentos']
+  products: [
+    'tecidos', 'aviamentos', 'acessórios', 'materiais', 'ferramentas', 'equipamentos',
+    'linhas', 'botões', 'zíperes', 'elásticos', 'entretelas', 'forros',
+    'etiquetas', 'tags', 'embalagens', 'máquinas', 'agulhas', 'alicates',
+    'tesouras', 'régua', 'esquadro', 'alfinetes', 'alfineteiras', 'dedais',
+    'moldes', 'papel', 'cartolina', 'plástico', 'metal', 'madeira'
+  ]
 };
 
 // Função para gerar imagem de perfil como base64 - imagem SVG gerada dinamicamente
@@ -245,25 +341,25 @@ async function seedDatabase() {
       console.log('Diretório de uploads criado:', uploadsDir);
     }
     
-    // Criar 5 profissionais
+    // Criar 30 profissionais
     console.log('Criando profissionais...');
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 30; i++) {
       const professionalData = createProfessional(i);
       await usersService.create(professionalData);
       console.log(`Profissional ${i} criado: ${professionalData.email}`);
     }
     
-    // Criar 5 marcas
+    // Criar 20 marcas
     console.log('Criando marcas...');
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 20; i++) {
       const enterpriseData = createBrand(i);
       await usersService.create(enterpriseData);
       console.log(`Marca ${i} criada: ${enterpriseData.email}`);
     }
     
-    // Criar 5 fornecedores
+    // Criar 25 fornecedores
     console.log('Criando fornecedores...');
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 25; i++) {
       const supplierData = createSupplier(i);
       await usersService.create(supplierData);
       console.log(`Fornecedor ${i} criado: ${supplierData.email}`);

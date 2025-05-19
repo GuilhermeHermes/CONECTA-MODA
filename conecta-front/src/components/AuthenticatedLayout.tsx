@@ -17,7 +17,7 @@ import {
   Box,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconDashboard, IconLogout, IconUser } from '@tabler/icons-react';
+import { IconDashboard, IconLogout, IconUser, IconUsers, IconTruck } from '@tabler/icons-react';
 import Link from 'next/link';
 
 interface AuthenticatedLayoutProps {
@@ -40,6 +40,32 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   if (!isAuthenticated) {
     return null;
   }
+
+  const navButtonStyle = {
+    display: 'block',
+    width: '100%',
+    padding: theme.spacing.xs,
+    borderRadius: theme.radius.sm,
+    color: 'white',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    },
+  };
+
+  const NavButton = ({ href, icon: Icon, label }: { href: string; icon: any; label: string }) => (
+    <Link href={href} style={{ textDecoration: 'none', color: 'inherit' }}>
+      <UnstyledButton style={navButtonStyle}>
+        <Group>
+          <Icon style={{ width: rem(16), height: rem(16) }} />
+          <Box style={{ overflow: 'hidden', width: isHovered ? 'auto' : 0 }}>
+            <Text size="sm" style={{ whiteSpace: 'nowrap' }}>
+              {label}
+            </Text>
+          </Box>
+        </Group>
+      </UnstyledButton>
+    </Link>
+  );
 
   return (
     <AppShell
@@ -96,52 +122,10 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
         onMouseLeave={() => setIsHovered(false)}
         style={{ backgroundColor: '#0E4B82' }}
       >
-        <Link href="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <UnstyledButton
-            style={{
-              display: 'block',
-              width: '100%',
-              padding: theme.spacing.xs,
-              borderRadius: theme.radius.sm,
-              color: 'white',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              },
-            }}
-          >
-            <Group>
-              <IconDashboard style={{ width: rem(16), height: rem(16) }} />
-              <Box style={{ overflow: 'hidden', width: isHovered ? 'auto' : 0 }}>
-                <Text size="sm" style={{ whiteSpace: 'nowrap' }}>
-                  Dashboard
-                </Text>
-              </Box>
-            </Group>
-          </UnstyledButton>
-        </Link>
-        <Link href="/profile/edit" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <UnstyledButton
-            style={{
-                display: 'block',
-                width: '100%',
-                padding: theme.spacing.xs,
-                borderRadius: theme.radius.sm,
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                },
-            }}
-          >
-            <Group>
-              <IconUser style={{ width: rem(16), height: rem(16) }} />
-              <Box style={{ overflow: 'hidden', width: isHovered ? 'auto' : 0 }}>
-                <Text size="sm" style={{ whiteSpace: 'nowrap' }}>
-                  Meu perfil
-                </Text>
-              </Box>
-            </Group>
-          </UnstyledButton>
-          </Link>
+        <NavButton href="/dashboard" icon={IconDashboard} label="Dashboard" />
+        <NavButton href="/professionals" icon={IconUsers} label="Profissionais" />
+        <NavButton href="/suppliers" icon={IconTruck} label="Fornecedores" />
+        <NavButton href="/profile/edit" icon={IconUser} label="Meu perfil" />
       </AppShell.Navbar>
 
       <AppShell.Main>

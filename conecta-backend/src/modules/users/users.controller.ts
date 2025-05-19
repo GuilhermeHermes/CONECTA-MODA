@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User, UserRole } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
+import { FilterUsersDto } from './dto/filter-users.dto';
 
 @Controller('users')
 export class UsersController {
@@ -52,16 +53,22 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('professionals')
-  async findProfessionals(): Promise<User[]> {
-    const users = await this.usersService.findByRole(UserRole.PROFESSIONAL);
-    return this.processUsersUrls(users);
+  async findProfessionals(@Query() filterDto: FilterUsersDto) {
+    const result = await this.usersService.findProfessionals(filterDto);
+    return {
+      ...result,
+      data: this.processUsersUrls(result.data)
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('suppliers')
-  async findSuppliers(): Promise<User[]> {
-    const users = await this.usersService.findByRole(UserRole.SUPPLIER);
-    return this.processUsersUrls(users);
+  async findSuppliers(@Query() filterDto: FilterUsersDto) {
+    const result = await this.usersService.findSuppliers(filterDto);
+    return {
+      ...result,
+      data: this.processUsersUrls(result.data)
+    };
   }
 
   @UseGuards(JwtAuthGuard)
