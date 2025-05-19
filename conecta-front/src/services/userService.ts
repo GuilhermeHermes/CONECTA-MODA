@@ -47,7 +47,7 @@ export const userService = {
       products: userData.products || [],
       hasPhysicalStore: userData.hasPhysicalStore || false,
       hasEcommerce: userData.hasEcommerce || false,
-      profilePicture: userData.profileImageUrl || null
+      profilePicture: userData.profilePicture || null,
     };
 
     // Ensure roles is one of the valid values
@@ -102,7 +102,6 @@ export const userService = {
     // Map frontend fields to backend format
     const mappedData = {
       ...data,
-      profilePicture: data.profileImageUrl,
     };
     
     const response = await api.patch('/users/me', mappedData);

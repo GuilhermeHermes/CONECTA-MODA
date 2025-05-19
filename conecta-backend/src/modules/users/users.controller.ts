@@ -1,4 +1,8 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from './users.service';
 import { User, UserRole } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -96,5 +100,63 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string): Promise<void> {
     return this.usersService.remove(id);
+  }
+
+  @Post('upload-profile-picture')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/profile-pictures',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = uuidv4();
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+          return cb(new Error('Only image files are allowed!'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadProfilePicture(@UploadedFile() file: Express.Multer.File, @Req() req) {
+    const profilePicturePath = `/uploads/profile-pictures/${file.filename}`;
+    
+    return {
+      profilePicture: `${this.configService.get('BACKEND_URL')}${profilePicturePath}`,
+    };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('me/profile-picture')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/profile-pictures',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = uuidv4();
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+          return cb(new Error('Only image files are allowed!'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadAuthenticatedProfilePicture(@UploadedFile() file: Express.Multer.File, @Req() req) {
+    const user = await this.usersService.findOne(req.user.id);
+    const profilePicturePath = `/uploads/profile-pictures/${file.filename}`;
+    
+    await this.usersService.update(user.id, {
+      profilePicture: profilePicturePath,
+    });
+
+    return {
+      profilePicture: `${this.configService.get('BACKEND_URL')}${profilePicturePath}`,
+    };
   }
 } 

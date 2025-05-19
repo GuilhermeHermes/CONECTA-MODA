@@ -88,7 +88,7 @@ export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
             <Menu.Target>
               <UnstyledButton>
                 <Group>
-                  <Avatar color="blue" radius="xl">
+                  <Avatar src={user?.profilePicture} color="blue" radius="xl">
                     {user?.nome?.[0]?.toUpperCase() || 'U'}
                   </Avatar>
                   <Text size="sm" fw={500}>

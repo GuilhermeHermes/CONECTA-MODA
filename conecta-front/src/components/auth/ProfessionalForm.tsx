@@ -3,8 +3,8 @@
 import { Stack, Button, Group, TextInput, Textarea, MultiSelect, Switch, Title, Text } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useUser } from '@/contexts/UserContext';
-import { ProfileImageUpload } from '@/components/ui/ProfileImageUpload';
 import { useState } from 'react';
+import { ProfilePictureUpload } from './ProfilePictureUpload';
 
 const SEGMENTOS_DATA = [
   { value: 'feminino', label: 'Feminino' },
@@ -79,8 +79,6 @@ export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormPr
   const { user } = useUser();
   const [showEcommerce, setShowEcommerce] = useState(initialValues?.hasEcommerce || false);
   const [showLoja, setShowLoja] = useState(initialValues?.hasPhysicalStore || false);
-  const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(initialValues?.profilePicture || null);
   
   const role = user?.roles?.[0]?.toLowerCase() || '';
   
@@ -145,25 +143,12 @@ export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormPr
     return value;
   };
 
-  const handleImageChange = (file: File | null) => {
-    setProfileImage(file);
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImageUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setProfileImageUrl(null);
-    }
-  };
 
   const handleSubmit = (values: FormValues) => {
     const { socialLinks, ...rest } = values;
     
     onSubmit({
       ...rest,
-      profilePicture: profileImageUrl,
       hasPhysicalStore: showLoja,
       hasEcommerce: showEcommerce,
       website: socialLinks.website || null,
@@ -211,11 +196,10 @@ export function ProfessionalForm({ onSubmit, initialValues }: ProfessionalFormPr
         <Title order={4}>Dados Profissionais</Title>
         <Text c="dimmed" size="sm">Preencha os dados do seu perfil profissional</Text>
         
-        <ProfileImageUpload 
-          initialImage={profileImageUrl || undefined}
-          onChange={handleImageChange}
+        <ProfilePictureUpload 
+          onUploadComplete={(url) => form.setFieldValue('profilePicture', url)}
         />
-        
+
         <TextInput
           label={professionalNameLabel}
           placeholder={professionalNamePlaceholder}

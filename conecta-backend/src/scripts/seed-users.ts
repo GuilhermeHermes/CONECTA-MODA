@@ -164,40 +164,12 @@ const userData = {
   ]
 };
 
-// Função para gerar imagem de perfil como base64 - imagem SVG gerada dinamicamente
-function generateProfileImage(name: string, type: 'PROFESSIONAL' | 'BRAND' | 'SUPPLIER'): string {
-  // Extrair iniciais do nome
-  const nameParts = name.split(' ');
-  const initials = nameParts.length > 1 
-    ? `${nameParts[0][0]}${nameParts[1][0]}` 
-    : name.substring(0, 2);
-  
-  // Cores diferentes por tipo de usuário
-  let bgColor = '';
-  let textColor = '#FFFFFF';
-  
-  switch (type) {
-    case 'PROFESSIONAL':
-      bgColor = random.color(); 
-      break;
-    case 'BRAND':
-      bgColor = random.color(); 
-      break;
-    case 'SUPPLIER':
-      bgColor = random.color(); 
-      break;
-  }
-  
-  // SVG para a imagem de perfil
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
-    <rect width="200" height="200" fill="${bgColor}" />
-    <text x="100" y="115" font-family="Arial" font-size="70" text-anchor="middle" fill="${textColor}" font-weight="bold">${initials}</text>
-  </svg>`;
-  
-  // Converter para base64
-  const base64 = `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
-  return base64;
+// Função para gerar URL do avatar
+function generateAvatarUrl(email: string): string {
+  // Usar o email como seed para gerar um avatar consistente
+  const seed = email.split('@')[0];
+  // Usar o estilo 'adventurer' do DiceBear que gera avatares mais profissionais
+  return `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}&backgroundColor=b6e3f4`;
 }
 
 // Função para criar um usuário profissional
@@ -205,17 +177,19 @@ function createProfessional(index: number) {
   const firstName = random.pick(userData.names);
   const lastName = random.pick(userData.surnames);
   const fullName = `${firstName} ${lastName}`;
+  const email = `profissional${index}@exemplo.com`;
   const skills = Array(random.number(2, 4)).fill(0).map(() => random.pick(userData.skills));
   
   return {
     name: fullName,
-    email: `profissional${index}@exemplo.com`,
+    email,
     password: 'Senha123!',
     phone: random.phone(),
     documentType: DocumentType.CPF,
     documentNumber: random.cpf(),
     birthDate: random.date(new Date(1970, 0, 1), new Date(2000, 0, 1)),
     gender: random.pick([Gender.MALE, Gender.FEMALE, Gender.OTHER]),
+    profilePicture: generateAvatarUrl(email),
     address: {
       street: random.pick(userData.streets),
       number: random.number(1, 999).toString(),
@@ -239,23 +213,23 @@ function createProfessional(index: number) {
     linkedin: `${firstName.toLowerCase()}-${lastName.toLowerCase()}`,
     website: random.boolean() ? `https://www.${firstName.toLowerCase()}costura.com.br` : '',
     
-    // Imagem de perfil
-    profileImageUrl: generateProfileImage(fullName, 'PROFESSIONAL')
   };
 }
 
 // Função para criar um usuário marca (empresa)
 function createBrand(index: number) {
   const brandName = random.pick(userData.brandNames);
+  const email = `marca${index}@exemplo.com`;
   const segments = Array(random.number(1, 3)).fill(0).map(() => random.pick(userData.segments));
   
   return {
     name: random.pick(userData.names) + ' ' + random.pick(userData.surnames),
-    email: `marca${index}@exemplo.com`,
+    email,
     password: 'Senha123!',
     phone: random.phone(),
     documentType: DocumentType.CNPJ,
     documentNumber: random.cnpj(),
+    profilePicture: generateAvatarUrl(email),
     address: {
       street: random.pick(userData.streets),
       number: random.number(1, 999).toString(),
@@ -281,23 +255,23 @@ function createBrand(index: number) {
     hasPhysicalStore: random.boolean(),
     hasEcommerce: random.boolean(),
     
-    // Imagem de perfil
-    profileImageUrl: generateProfileImage(brandName, 'BRAND')
   };
 }
 
 // Função para criar um usuário fornecedor
 function createSupplier(index: number) {
   const supplierName = random.pick(userData.supplierNames);
+  const email = `fornecedor${index}@exemplo.com`;
   const products = Array(random.number(2, 4)).fill(0).map(() => random.pick(userData.products));
   
   return {
     name: random.pick(userData.names) + ' ' + random.pick(userData.surnames),
-    email: `fornecedor${index}@exemplo.com`,
+    email,
     password: 'Senha123!',
     phone: random.phone(),
     documentType: DocumentType.CNPJ,
     documentNumber: random.cnpj(),
+    profilePicture: generateAvatarUrl(email),
     address: {
       street: random.pick(userData.streets),
       number: random.number(1, 999).toString(),
@@ -321,8 +295,6 @@ function createSupplier(index: number) {
     linkedin: `${supplierName.toLowerCase().replace(/\s+/g, '-')}`,
     website: `https://www.${supplierName.toLowerCase().replace(/\s+/g, '')}.com.br`,
     
-    // Imagem de perfil
-    profileImageUrl: generateProfileImage(supplierName, 'SUPPLIER')
   };
 }
 

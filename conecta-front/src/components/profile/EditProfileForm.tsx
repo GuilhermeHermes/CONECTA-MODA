@@ -2,6 +2,7 @@
 
 import { Stack, Button, Group, TextInput, Textarea } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { ProfilePictureUpload } from '../auth/ProfilePictureUpload';
 
 interface EditProfileFormProps {
   user: {
@@ -80,6 +81,10 @@ export function EditProfileForm({ user, onSubmit, onCancel }: EditProfileFormPro
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack gap="md">
+        <ProfilePictureUpload 
+          onUploadComplete={(url) => form.setFieldValue('profilePicture', url)}
+        />
+
         <TextInput
           label="Nome Completo"
           placeholder="Seu nome completo"

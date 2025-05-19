@@ -24,9 +24,9 @@ async function bootstrap() {
     },
   }));
   
-  // Configurar pasta de uploads como estática
-  app.useStaticAssets(join(process.cwd(), 'uploads'), {
-    prefix: '/uploads/',
+  // Serve static files from uploads directory
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads',
   });
   
   const port = configService.get('PORT', 3001);
