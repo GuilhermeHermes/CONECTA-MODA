@@ -1,22 +1,43 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
-interface RegistrationData {
-  role?: string;
-  nome?: string;
+interface Address {
+  cep: string;
+  street: string;
+  number: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  complement?: string;
+}
+
+export interface RegistrationData {
+  name?: string;
   email?: string;
-  telefone?: string;
-  cpf?: string;
-  cnpj?: string;
-  dataNascimento?: Date | null;
-  genero?: string;
-  endereco?: string;
-  numero?: string;
-  bairro?: string;
-  cidade?: string;
-  pais?: string;
-  estado?: string;
+  password?: string;
+  confirmPassword?: string;
+  documentType?: 'cpf' | 'cnpj';
+  documentNumber?: string;
+  birthDate?: Date | null;
+  phone?: string;
+  role?: string;
+  address?: Address;
+  professionalName?: string;
+  professionalEmail?: string;
+  professionalPhone?: string;
+  miniBio?: string;
+  professionalLocation?: string;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
+  linkedin?: string;
+  segments?: string[];
+  skills?: string[];
+  products?: string[];
+  hasPhysicalStore?: boolean;
+  hasEcommerce?: boolean;
+  profileImageUrl?: string | null;
 }
 
 interface RegistrationContextType {
@@ -25,26 +46,90 @@ interface RegistrationContextType {
   clearRegistrationData: () => void;
 }
 
+const STORAGE_KEY = 'registration_data';
+
+const initialData: RegistrationData = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  documentType: 'cpf',
+  documentNumber: '',
+  birthDate: null,
+  phone: '',
+  address: {
+    cep: '',
+    street: '',
+    number: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+    complement: '',
+  },
+};
+
 const RegistrationContext = createContext<RegistrationContextType | undefined>(undefined);
 
 export function RegistrationProvider({ children }: { children: ReactNode }) {
-  const [registrationData, setRegistrationData] = useState<RegistrationData>({});
+  // Inicializa o estado com dados do localStorage ou dados iniciais
+  const [registrationData, setRegistrationData] = useState<RegistrationData>(() => {
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          // Converte a string de data de volta para objeto Date
+          if (parsedData.birthDate) {
+            parsedData.birthDate = new Date(parsedData.birthDate);
+          }
+          return parsedData;
+        } catch (error) {
+          console.error('Erro ao carregar dados do localStorage:', error);
+          return initialData;
+        }
+      }
+    }
+    return initialData;
+  });
+
+  // Salva no localStorage sempre que os dados mudarem
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(registrationData));
+    }
+  }, [registrationData]);
 
   const updateRegistrationData = (data: Partial<RegistrationData>) => {
-    setRegistrationData((prev) => ({ ...prev, ...data }));
+    setRegistrationData((prev) => {
+      const newData = { ...prev, ...data };
+      
+      // Ensure role is not 'user' if it's being set
+      if (data.role === 'user') {
+        delete newData.role;
+      }
+      
+      // Ensure address is properly structured
+      if (data.address) {
+        newData.address = {
+          ...prev.address,
+          ...data.address
+        };
+      }
+      
+      return newData;
+    });
   };
 
   const clearRegistrationData = () => {
-    setRegistrationData({});
+    setRegistrationData(initialData);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY);
+    }
   };
 
   return (
     <RegistrationContext.Provider
-      value={{
-        registrationData,
-        updateRegistrationData,
-        clearRegistrationData,
-      }}
+      value={{ registrationData, updateRegistrationData, clearRegistrationData }}
     >
       {children}
     </RegistrationContext.Provider>

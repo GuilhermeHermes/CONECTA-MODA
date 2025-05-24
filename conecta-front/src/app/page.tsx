@@ -3,37 +3,36 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { TextInput, PasswordInput, Button, Text, Anchor, Paper, Title, Container } from '@mantine/core';
+import { TextInput, PasswordInput, Button, Text, Anchor, Paper, Title, Container, Divider } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const { login, loginWithGoogle } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      await login(email, password);
+      notifications.show({
+        title: 'Login bem sucedido!',
+        message: 'Bem-vindo de volta.',
+        color: 'green',
       });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Login bem-sucedido
-        console.log('Login realizado com sucesso:', data.user);
-        router.push('/dashboard'); // Redireciona para o dashboard
-      } else {
-        // Login falhou
-        setError(data.message || 'Erro ao realizar login. Tente novamente.');
-      }
-    } catch (err) {
-      setError('Erro ao conectar com o servidor. Tente novamente.');
+    } catch (error: any) {
+      notifications.show({
+        title: 'Erro no login',
+        message: error.response?.data?.message || 'Credenciais inválidas. Tente novamente.',
+        color: 'red',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -70,12 +69,6 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit}>
-              {error && (
-                <Text c="red" size="sm" ta="center" mb="md">
-                  {error}
-                </Text>
-              )}
-
               <TextInput
                 label="Email"
                 placeholder="seu@email.com"
@@ -98,13 +91,26 @@ export default function LoginPage() {
                 Esqueceu sua senha?
               </Anchor>
 
-              <Button fullWidth mt="xl" type="submit">
+              <Button fullWidth mt="xl" type="submit" loading={isSubmitting}>
                 Entrar
               </Button>
 
+              {/* <Divider label="ou continue com" labelPosition="center" my="lg" />
+
+              <Button 
+                variant="outline" 
+                fullWidth 
+                onClick={() => loginWithGoogle()}
+                leftSection={
+                  <Image src="/assets/google.svg" width={20} height={20} alt="Google" />
+                }
+              >
+                Google
+              </Button> */}
+
               <Text ta="center" mt="md">
                 Não tem uma conta?{' '}
-                <Anchor component="button" type="button" onClick={() => router.push('/chooseRole')}>
+                <Anchor component="button" type="button" onClick={() => router.push('/cadastro/chooseRole')}>
                   Cadastre-se
                 </Anchor>
               </Text>
