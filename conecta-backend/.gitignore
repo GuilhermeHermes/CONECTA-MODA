@@ -23,6 +23,3 @@ Thumbs.db
 # IDEs/Editors
 .vscode/
 .idea/
-
-package-lock.json
-package.json
