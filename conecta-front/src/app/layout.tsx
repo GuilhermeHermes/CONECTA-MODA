@@ -26,18 +26,18 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
+            <AuthProvider>
         <MantineProvider>
           <DatesProvider settings={{ locale: 'pt-br' }}>
             <Notifications />
-            <AuthProvider>
               <RegistrationProvider>
                 <RouteGuard>
                   {children}
                 </RouteGuard>
               </RegistrationProvider>
-            </AuthProvider>
           </DatesProvider>
         </MantineProvider>
+            </AuthProvider>
       </body>
     </html>
   );
