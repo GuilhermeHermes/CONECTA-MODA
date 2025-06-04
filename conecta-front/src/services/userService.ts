@@ -52,7 +52,7 @@ export const userService = {
 
     // Ensure roles is one of the valid values
     if (!['DEFAULT', 'PROFESSIONAL', 'SUPPLIER', 'BRAND'].includes(mappedData.roles[0])) {
-      throw new Error('Invalid role value');
+      throw new Error('Tipo de perfil inválido');
     }
 
     // Ensure gender is one of the valid values
@@ -65,6 +65,7 @@ export const userService = {
   },
 
   async getCurrentUser() {
+    console.log('TA CHAMANDO AQUI NO GETCURRENTUSER')
     const response = await api.get('/auth/profile');
     const userData = response.data;
     

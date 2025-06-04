@@ -71,6 +71,8 @@ export function EditProfileForm({ user, onSubmit, onCancel }: EditProfileFormPro
     },
   });
 
+  console.log(form.values, 'fom da silva')
+
   const handleSubmit = (values: any) => {
     onSubmit({
       ...values,

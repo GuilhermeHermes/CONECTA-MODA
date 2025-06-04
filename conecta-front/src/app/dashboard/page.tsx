@@ -9,6 +9,7 @@ import { IconUsers, IconTruck, IconChartBar, IconSettings } from '@tabler/icons-
 export default function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  console.log('user no dashboard: ' + user)
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

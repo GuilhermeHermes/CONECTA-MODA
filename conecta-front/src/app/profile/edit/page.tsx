@@ -7,7 +7,14 @@ import { useRouter } from 'next/navigation';
 
 export default function EditProfilePage() {
   const { user } = useAuth();
+
+//PROBLEMA: NA PRIMEIRA VEZ QUE A PAGINA É CARREGADA, CASO NÃO SEJA ATUALIZADA, VEM APENAS COM AS INFOS DO LOGIN, Q NÃO É O USER COMPLETO, MAS SE ATUALIZAR AI CHAMA O AUTH/PROFILE.
+
   const router = useRouter();
+
+  console.log(user)
+  
+
 
   const handleSubmit = async (data: any) => {
     // Handle form submission
