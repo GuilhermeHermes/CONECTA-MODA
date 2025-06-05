@@ -23,7 +23,7 @@ import { Account } from './modules/users/entities/account.entity';
         password: configService.get('DB_PASSWORD', 'conecta'),
         database: configService.get('DB_DATABASE', 'conecta_db'),
         entities: [User, Address, Account],
-        synchronize: configService.get('NODE_ENV', 'development') !== 'production',
+        synchronize: true, // Isso criará automaticamente as tabelas
         dropSchema: configService.get('NODE_ENV', 'development') === 'development' && 
                     configService.get('DROP_SCHEMA', 'false') === 'true',
         logging: configService.get('NODE_ENV', 'development') === 'development',
