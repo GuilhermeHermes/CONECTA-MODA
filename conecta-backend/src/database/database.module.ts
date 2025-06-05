@@ -15,9 +15,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         database: configService.get('DB_DATABASE', 'conecta_db'),
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         synchronize: configService.get('NODE_ENV') !== 'production',
+        // Adiciona configuração SSL para conexão segura
+        ssl: configService.get('NODE_ENV') === 'production' 
+          ? { 
+              rejectUnauthorized: false 
+            } 
+          : false,
       }),
       inject: [ConfigService],
     }),
   ],
 })
-export class DatabaseModule {} 
+export class DatabaseModule {}
