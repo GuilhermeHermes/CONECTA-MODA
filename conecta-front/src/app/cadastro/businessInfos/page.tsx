@@ -19,7 +19,7 @@ export default function BusinessInfosPage() {
         console.log('BusinessInfos - Verificando dados do contexto:', registrationData);
         
         // Verifica se tem role
-        if (!registrationData.role) {
+        if (!registrationData?.role) {
             console.log('BusinessInfos - Role não encontrada, redirecionando para chooseRole');
             notifications.show({
                 title: 'Acesso negado',
@@ -32,7 +32,9 @@ export default function BusinessInfosPage() {
 
         // Verifica se tem dados pessoais básicos
         const requiredPersonalFields = ['name', 'email', 'phone', 'documentType', 'documentNumber', 'birthDate'];
-        const missingPersonalFields = requiredPersonalFields.filter(field => !registrationData[field as keyof typeof registrationData]);
+        const missingPersonalFields = requiredPersonalFields.filter(field => 
+            !registrationData?.[field as keyof typeof registrationData]
+        );
 
         if (missingPersonalFields.length > 0) {
             console.log('BusinessInfos - Dados pessoais incompletos:', missingPersonalFields);
@@ -172,21 +174,17 @@ export default function BusinessInfosPage() {
             <ProfessionalForm 
                 onSubmit={handleSubmit}
                 initialValues={{
-                    professionalName: registrationData.name,
-                    professionalEmail: registrationData.email,
-                    professionalPhone: registrationData.phone,
+                    professionalName: registrationData?.name ?? '',
+                    professionalEmail: registrationData?.email ?? '',
+                    professionalPhone: registrationData?.phone ?? '',
                     miniBio: '',
                     professionalLocation: '',
-                    website: '',
-                    instagram: '',
-                    facebook: '',
-                    linkedin: '',
                     segments: [],
                     skills: [],
                     products: [],
                     hasPhysicalStore: false,
                     hasEcommerce: false,
-                    profileImageUrl: null,
+                    profilePicture: null,
                     socialLinks: {
                         website: '',
                         instagram: '',
@@ -194,8 +192,7 @@ export default function BusinessInfosPage() {
                         linkedin: ''
                     }
                 }}
-                loading={isSubmitting}
             />
         </RegistrationLayout>
     );
-} 
+}

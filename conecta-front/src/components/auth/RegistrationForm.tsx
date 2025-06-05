@@ -46,23 +46,6 @@ export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormPr
 
   const form = useForm<PersonalFormData>({
     initialValues: {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      documentType: 'cpf',
-      documentNumber: '',
-      birthDate: null,
-      phone: '',
-      gender: '',
-      address: {
-        cep: '',
-        street: '',
-        number: '',
-        neighborhood: '',
-        city: '',
-        state: '',
-      },
       ...initialValues,
     },
     validate: {

@@ -22,6 +22,7 @@ export interface RegistrationData {
   birthDate?: Date | null;
   phone?: string;
   role?: string;
+  gender: string;
   address?: Address;
   professionalName?: string;
   professionalEmail?: string;
@@ -37,7 +38,7 @@ export interface RegistrationData {
   products?: string[];
   hasPhysicalStore?: boolean;
   hasEcommerce?: boolean;
-  profileImageUrl?: string | null;
+  profilePicture?: string | null;
 }
 
 interface RegistrationContextType {
@@ -55,6 +56,7 @@ const initialData: RegistrationData = {
   confirmPassword: '',
   documentType: 'cpf',
   documentNumber: '',
+  gender: '',
   birthDate: null,
   phone: '',
   address: {

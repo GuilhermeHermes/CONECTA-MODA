@@ -117,7 +117,7 @@ export default function AboutYouPage() {
         >
             <RegistrationForm 
                 onSubmit={handleSubmit}
-                initialValues={initialValues}
+                initialValues={initialValues as any}
                 loading={loading}
             />
         </RegistrationLayout>

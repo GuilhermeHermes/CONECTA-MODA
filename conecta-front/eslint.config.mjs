@@ -15,7 +15,6 @@ const eslintConfig = [
     rules: {
       semi: ["error", "always"],
       quotes: ["error", "double"],
-      "prefer-error-callback": ["error"],
       "prefer-template": ["error"],
       "prettier/prettier": ["error"],
     },
