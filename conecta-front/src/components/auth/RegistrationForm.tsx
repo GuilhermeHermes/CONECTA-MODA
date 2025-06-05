@@ -35,8 +35,9 @@ export interface PersonalFormData {
 }
 
 interface RegistrationFormProps {
-  onSubmit?: (values: PersonalFormData) => void;
-  initialValues?: Partial<PersonalFormData>;
+  onSubmit: (values: PersonalFormData) => Promise<void>;
+  initialValues: PersonalFormData;
+  loading?: boolean; // Adicionando a propriedade como opcional
 }
 
 export function RegistrationForm({ onSubmit, initialValues }: RegistrationFormProps) {
