@@ -27,6 +27,12 @@ import { Account } from './modules/users/entities/account.entity';
         dropSchema: configService.get('NODE_ENV', 'development') === 'development' && 
                     configService.get('DROP_SCHEMA', 'false') === 'true',
         logging: configService.get('NODE_ENV', 'development') === 'development',
+        // Adiciona configuração SSL para conexão segura
+        ssl: configService.get('NODE_ENV', 'development') === 'production' 
+          ? { 
+              rejectUnauthorized: false 
+            } 
+          : false,
       }),
     }),
     UsersModule,
